@@ -19,7 +19,7 @@
 	<properties>
 		<opencommercesearch.version>0.2-SNAPSHOT</opencommercesearch.version>
 		<solr.version>4.2.1</solr.version>
-		<atg.version>10.0.1</atg.version>
+		<atg.version>10.1.2</atg.version>
 		<junit.version>4.11</junit.version>
 		<mockito.version>1.9.5</mockito.version>
 		<powermock.version>1.5</powermock.version>

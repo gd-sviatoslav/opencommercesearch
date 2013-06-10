@@ -26,32 +26,24 @@
 		<dependency>
 			<groupId>atg</groupId>
 			<artifactId>das</artifactId>
-			<scope>system</scope>
-			<systemPath>${env.ATG_HOME}/DAS/lib/classes.jar</systemPath>
 		</dependency>
 
 		<!-- ATG Dynamo Personalization Server -->
 		<dependency>
 			<groupId>atg</groupId>
 			<artifactId>dps</artifactId>
-			<scope>system</scope>
-			<systemPath>${env.ATG_HOME}/DPS/lib/classes.jar</systemPath>
 		</dependency>
 
 		<!-- ATG BCC -->
 		<dependency>
 			<groupId>atg</groupId>
 			<artifactId>bcc</artifactId>
-			<scope>system</scope>
-			<systemPath>${env.ATG_HOME}/BCC/lib/classes.jar</systemPath>
 		</dependency>
 
 		<!-- ATG WebUI -->
 		<dependency>
 			<groupId>atg</groupId>
 			<artifactId>webui</artifactId>
-			<scope>system</scope>
-			<systemPath>${env.ATG_HOME}/WebUI/lib/classes.jar</systemPath>
 		</dependency>
 
 		<dependency>
