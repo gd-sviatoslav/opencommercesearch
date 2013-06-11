@@ -19,10 +19,13 @@ package org.opencommercesearch;
 * under the License.
 */
 
-public class SearchConstants {
+public final class SearchConstants {
+    
     public static final String CATEGORY_SEPARATOR = ".";
+    
+    public static final String CATEGORY_PATH = "categoryPath";
 
     private SearchConstants() {
-
     }
+    
 }

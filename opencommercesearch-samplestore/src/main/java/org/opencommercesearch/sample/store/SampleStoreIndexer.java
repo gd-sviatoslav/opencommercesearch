@@ -27,39 +27,52 @@ import org.opencommercesearch.feed.SearchFeed;
 import atg.commerce.inventory.InventoryException;
 import atg.repository.RepositoryException;
 import atg.repository.RepositoryItem;
+import com.google.common.collect.Lists;
 
 /**
  * @author S.L. (slisenkin at griddynamics dot com) 11.06.2013 17:01:36
  */
-public class SampleStoreSearchFeed extends SearchFeed {
+public class SampleStoreIndexer extends SearchFeed {
 
+    private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
     
-    public SampleStoreSearchFeed() {
+    public SampleStoreIndexer() {
     }
     
     @Override
     protected void onFeedStarted(long indexStamp) {
-        // todo now sl: implement this
+        ATGLoggingUtil.info(this, "Feed import started, indexStamp=[{0}].", indexStamp);
     }
 
     @Override
     protected void onDocumentsSent(UpdateResponse response, List<SolrInputDocument> documentList) {
-        // todo now sl: implement this
+        ATGLoggingUtil.info(this, "Feed import, sent [{0}] documents.", documentList.size());
     }
 
     @Override
     protected void onDocumentsSentError(List<SolrInputDocument> documentList) {
-        // todo now sl: implement this
+        // nothing
     }
 
     @Override
     protected void onFeedFinished(long indexStamp) {
-        // todo now sl: implement this
+        ATGLoggingUtil.info(this, "Feed import finished, indexStamp=[{0}].", indexStamp);
     }
 
     @Override
     protected void processProduct(RepositoryItem product, Map<Locale, List<SolrInputDocument>> documents) throws RepositoryException,
             InventoryException {
+        List<SolrInputDocument> docs = documents.get(DEFAULT_LOCALE);
+        if(null == docs){
+            docs = Lists.newArrayList();
+            documents.put(DEFAULT_LOCALE, docs);
+        }
+        SolrInputDocument doc = new SolrInputDocument();
+        // todo now sl: load fields by schema 
+        
+        // loadCategoryPaths(doc, product, catalogAssignments, categoryCatalogs);
+        
+        
         // todo now sl: implement this
     }
 

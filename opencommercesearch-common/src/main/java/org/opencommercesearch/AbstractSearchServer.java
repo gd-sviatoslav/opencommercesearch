@@ -71,8 +71,7 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
 
     private static final String Q_ALT = "q.alt";
     private static final String BRAND_ID = "brandId";
-    private static final String CATEGORY_PATH = "categoryPath";
-
+    
     private Map<String, T> catalogSolrServers = new HashMap<String, T>();
     private Map<String, T> rulesSolrServers = new HashMap<String, T>();
     private String catalogCollection;
@@ -269,8 +268,8 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
             }
 
             if (addCategoryGraph) {
-                query.setFacetPrefix(CATEGORY_PATH, categoryPath);
-                query.addFacetField(CATEGORY_PATH);
+                query.setFacetPrefix(SearchConstants.CATEGORY_PATH, categoryPath);
+                query.addFacetField(SearchConstants.CATEGORY_PATH);
                 query.set("f.categoryPath.facet.limit", options.getMaxCategoryResults());
             }
 
@@ -281,7 +280,7 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
             List<String> queryAltParams = new ArrayList<String>();
 
             if (hasCategoryId) {
-                queryAltParams.add(CATEGORY_PATH + ":" + categoryPath);
+                queryAltParams.add(SearchConstants.CATEGORY_PATH + ":" + categoryPath);
                 query.setParam("q", "");
             }
 
@@ -362,7 +361,7 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
             query.setFacetMinCount(1);
 
             RepositoryItem catalog = (RepositoryItem) site.getPropertyValue("defaultCatalog");
-            query.setFilterQueries(CATEGORY_PATH + ":" + catalog.getRepositoryId());
+            query.setFilterQueries(SearchConstants.CATEGORY_PATH + ":" + catalog.getRepositoryId());
 
             QueryResponse queryResponse = getCatalogSolrServer(locale).query(query);
             Facet facet = null;
@@ -886,7 +885,7 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
         List<CategoryGraph> categoryGraphList = new ArrayList<CategoryGraph>();
 
         for (Facet facet : searchResponse.getFacets()) {
-            if (CATEGORY_PATH.equalsIgnoreCase(facet.getName())) {
+            if (SearchConstants.CATEGORY_PATH.equalsIgnoreCase(facet.getName())) {
                 searchResponse.removeFacet(facet.getName());
                 return createCategoryGraphAux(facet, path, catalogId, categoryId);
             }
@@ -904,7 +903,7 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
             // graph from it
             for (Filter filter : facet.getFilters()) {
                 if (isLoggingDebug()) {
-                    String filterPath = Utils.findFilterExpressionByName(filter.getPath(), CATEGORY_PATH);
+                    String filterPath = Utils.findFilterExpressionByName(filter.getPath(), SearchConstants.CATEGORY_PATH);
                     logDebug("Generating CategoryGraph for path: " + filterPath);
                 }
                 categoryFacetBuilder.addPath(filter);
