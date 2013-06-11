@@ -26,9 +26,7 @@ import org.apache.commons.lang.StringUtils;
  * name and a expression.
  * 
  * @author rmerizalde
- * 
  */
-
 public class FilterQuery {
     public static final String SEPARATOR = ":";
 

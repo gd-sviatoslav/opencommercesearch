@@ -20,12 +20,17 @@ package org.opencommercesearch;
 * under the License.
 */
 
+import static org.opencommercesearch.SearchServerException.create;
+import static org.opencommercesearch.SearchServerException.Code.CORE_RELOAD_EXCEPTION;
+import static org.opencommercesearch.SearchServerException.Code.EXPORT_SYNONYM_EXCEPTION;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
-import java.util.*;
-
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.solr.client.solrj.ResponseParser;
@@ -47,11 +52,6 @@ import org.apache.zookeeper.KeeperException;
 import org.opencommercesearch.repository.SearchRepositoryItemDescriptor;
 import org.opencommercesearch.repository.SynonymListProperty;
 import org.opencommercesearch.repository.SynonymProperty;
-
-import static org.opencommercesearch.SearchServerException.create;
-import static org.opencommercesearch.SearchServerException.Code.CORE_RELOAD_EXCEPTION;
-import static org.opencommercesearch.SearchServerException.Code.EXPORT_SYNONYM_EXCEPTION;
-
 import atg.nucleus.ServiceException;
 import atg.repository.RepositoryException;
 import atg.repository.RepositoryItem;
@@ -66,7 +66,6 @@ import atg.repository.RepositoryView;
  * use a different host with either same or different collection name.
  * 
  * @author rmerizalde
- * 
  */
 public class CloudSearchServer extends AbstractSearchServer<CloudSolrServer> implements SearchServer {
     private static final BinaryResponseParser binaryParser = new BinaryResponseParser();
@@ -144,6 +143,7 @@ public class CloudSearchServer extends AbstractSearchServer<CloudSolrServer> imp
     public void close() throws IOException {
         for (Locale locale : SUPPORTED_LOCALES) {
             CloudSolrServer catalogSolrServer = getSolrServer(getCatalogCollection(), locale);
+            @SuppressWarnings("unused")
             String languagePrefix = "_" + locale.getLanguage();
 
             if (catalogSolrServer != null) {

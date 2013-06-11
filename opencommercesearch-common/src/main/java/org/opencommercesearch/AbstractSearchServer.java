@@ -1,33 +1,32 @@
 package org.opencommercesearch;
 
 /*
-* Licensed to OpenCommerceSearch under one
-* or more contributor license agreements. See the NOTICE file
-* distributed with this work for additional information
-* regarding copyright ownership. OpenCommerceSearch licenses this
-* file to you under the Apache License, Version 2.0 (the
-* "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied. See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ * Licensed to OpenCommerceSearch under one or more contributor license agreements. See the NOTICE file distributed with this work for
+ * additional information regarding copyright ownership. OpenCommerceSearch licenses this file to you under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
+ */
 
-import atg.multisite.Site;
-import atg.multisite.SiteContextManager;
-import atg.nucleus.GenericService;
-import atg.repository.Repository;
-import atg.repository.RepositoryException;
-import atg.repository.RepositoryItem;
-import atg.repository.RepositoryView;
-import atg.repository.rql.RqlStatement;
-
+import static org.opencommercesearch.SearchServerException.create;
+import static org.opencommercesearch.SearchServerException.Code.ANALYSIS_EXCEPTION;
+import static org.opencommercesearch.SearchServerException.Code.COMMIT_EXCEPTION;
+import static org.opencommercesearch.SearchServerException.Code.PING_EXCEPTION;
+import static org.opencommercesearch.SearchServerException.Code.SEARCH_EXCEPTION;
+import static org.opencommercesearch.SearchServerException.Code.TERMS_EXCEPTION;
+import static org.opencommercesearch.SearchServerException.Code.UPDATE_EXCEPTION;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
@@ -43,29 +42,37 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
 import org.apache.solr.client.solrj.response.SpellCheckResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.GroupCollapseParams;
 import org.apache.solr.common.util.NamedList;
-import org.apache.solr.common.SolrException;
 import org.opencommercesearch.Facet.Filter;
+import org.opencommercesearch.SearchServerException.ExportSynonymException;
 import org.opencommercesearch.repository.RedirectRuleProperty;
 import org.opencommercesearch.repository.SearchRepositoryItemDescriptor;
-
-import static org.opencommercesearch.SearchServerException.create;
-import static org.opencommercesearch.SearchServerException.Code.*;
-import static org.opencommercesearch.SearchServerException.ExportSynonymException;
-
-import java.io.IOException;
-import java.util.*;
+import atg.multisite.Site;
+import atg.multisite.SiteContextManager;
+import atg.nucleus.GenericService;
+import atg.repository.Repository;
+import atg.repository.RepositoryException;
+import atg.repository.RepositoryItem;
+import atg.repository.RepositoryView;
+import atg.repository.rql.RqlStatement;
 
 /**
- *
- *
+ * 
+ * Note! Current cloud implementation seem to have a bug. It supports the collection property but once a collection is used it sticks to it.
+ * 
  * @author gsegura
  * @author rmerizalde
  */
-public abstract class AbstractSearchServer<T extends SolrServer> extends GenericService implements SearchServer {     // Current cloud implementation seem to have a bug. It support the
-    // collection property but once a collection is used it sticks to it
+@SuppressWarnings("static-method")
+public abstract class AbstractSearchServer<T extends SolrServer> extends GenericService implements SearchServer {
+
+    private static final String Q_ALT = "q.alt";
+    private static final String BRAND_ID = "brandId";
+    private static final String CATEGORY_PATH = "categoryPath";
+
     private Map<String, T> catalogSolrServers = new HashMap<String, T>();
     private Map<String, T> rulesSolrServers = new HashMap<String, T>();
     private String catalogCollection;
@@ -81,6 +88,9 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
     private int ruleBatchSize;
     private RulesBuilder rulesBuilder;
 
+    public AbstractSearchServer() {
+    }
+    
     public void setCatalogSolrServer(T catalogSolrServer, Locale locale) {
         catalogSolrServers.put(locale.getLanguage(), catalogSolrServer);
     }
@@ -146,7 +156,7 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
     public void setCatalogConfig(String catalogConfig) {
         this.catalogConfig = catalogConfig;
     }
-    
+
     public String getRulesConfig() {
         return rulesConfig;
     }
@@ -198,7 +208,7 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
     public void setSynonymRql(RqlStatement synonymRql) {
         this.synonymRql = synonymRql;
     }
-    
+
     public int getRuleBatchSize() {
         return ruleBatchSize;
     }
@@ -206,7 +216,7 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
     public void setRuleBatchSize(int ruleBatchSize) {
         this.ruleBatchSize = ruleBatchSize;
     }
-        
+
     public RulesBuilder getRulesBuilder() {
         return rulesBuilder;
     }
@@ -215,24 +225,20 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
         this.rulesBuilder = rulesBuilder;
     }
 
-
-    private static final String Q_ALT = "q.alt";
-    private static final String BRAND_ID = "brandId";
-    private static final String CATEGORY_PATH = "categoryPath";
-    
-
     @Override
     public SearchResponse browse(BrowseOptions options, SolrQuery query, FilterQuery... filterQueries) throws SearchServerException {
         return browse(options, query, SiteContextManager.getCurrentSite(), Locale.US, filterQueries);
     }
 
     @Override
-    public SearchResponse browse(BrowseOptions options, SolrQuery query, Locale locale, FilterQuery... filterQueries) throws SearchServerException {
+    public SearchResponse browse(BrowseOptions options, SolrQuery query, Locale locale, FilterQuery... filterQueries)
+            throws SearchServerException {
         return browse(options, query, SiteContextManager.getCurrentSite(), locale, filterQueries);
     }
 
     @Override
-    public SearchResponse browse(BrowseOptions options, SolrQuery query, Site site, FilterQuery... filterQueries) throws SearchServerException {
+    public SearchResponse browse(BrowseOptions options, SolrQuery query, Site site, FilterQuery... filterQueries)
+            throws SearchServerException {
         return browse(options, query, SiteContextManager.getCurrentSite(), Locale.US, filterQueries);
     }
 
@@ -243,16 +249,17 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
         boolean hasCategoryId = StringUtils.isNotBlank(options.getCategoryId());
         boolean hasCategoryPath = StringUtils.isNotBlank(options.getCategoryPath());
         boolean hasBrandId = StringUtils.isNotBlank(options.getBrandId());
-        boolean addCategoryGraph = (options.isFetchCategoryGraph() || (hasBrandId && options.isFetchProducts())) && ! options.isRuleBasedPage();
+        boolean addCategoryGraph = (options.isFetchCategoryGraph() || (hasBrandId && options.isFetchProducts()))
+                && !options.isRuleBasedPage();
 
         String categoryPath = null;
-        
+
         if (options.isRuleBasedPage()) {
             //handle rule based pages
             String filter = rulesBuilder.buildRulesFilter(options.getCategoryId(), locale);
             query.set(Q_ALT, filter);
             query.setParam("q", "");
-            
+
         } else {
             //handle brand, category or onsale pages
             if (hasCategoryPath) {
@@ -260,35 +267,35 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
             } else {
                 categoryPath = options.getCatalogId() + ".";
             }
-    
+
             if (addCategoryGraph) {
                 query.setFacetPrefix(CATEGORY_PATH, categoryPath);
                 query.addFacetField(CATEGORY_PATH);
                 query.set("f.categoryPath.facet.limit", options.getMaxCategoryResults());
             }
-    
+
             if (!options.isFetchProducts()) {
                 query.setRows(0);
             }
-    
+
             List<String> queryAltParams = new ArrayList<String>();
-    
+
             if (hasCategoryId) {
                 queryAltParams.add(CATEGORY_PATH + ":" + categoryPath);
                 query.setParam("q", "");
             }
-    
+
             if (hasBrandId) {
                 queryAltParams.add(BRAND_ID + ":" + options.getBrandId());
                 query.setParam("q", "");
             }
-    
+
             if (options.isOnSale()) {
-                queryAltParams.add("onsale"+locale.getCountry()+":true");
+                queryAltParams.add("onsale" + locale.getCountry() + ":true");
             }
-    
+
             if (queryAltParams.size() > 0) {
-            	
+
                 query.set(Q_ALT, "(" + StringUtils.join(queryAltParams, " AND ") + ")");
             }
         }
@@ -297,19 +304,17 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
         if (site != null) {
             catalog = (RepositoryItem) site.getPropertyValue("defaultCatalog");
         }
-        
-        SearchResponse response =  doSearch(query, site, catalog, locale, false, filterQueries);
+
+        SearchResponse response = doSearch(query, site, catalog, locale, false, filterQueries);
 
         if (addCategoryGraph) {
-            response.setCategoryGraph(createCategoryGraph(response,
-                    options.getCategoryPath(), options.getCatalogId(),
+            response.setCategoryGraph(createCategoryGraph(response, options.getCategoryPath(), options.getCatalogId(),
                     options.getCategoryId()));
         }
 
         return response;
     }
-    
-    
+
     @Override
     public SearchResponse search(SolrQuery query, FilterQuery... filterQueries) throws SearchServerException {
         return search(query, SiteContextManager.getCurrentSite(), Locale.US, filterQueries);
@@ -345,31 +350,31 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
             throws SearchServerException {
         return doSearch(query, site, catalog, locale, true, filterQueries);
     }
-    
+
     @Override
     public Facet getFacet(Site site, Locale locale, String fieldFacet, int facetLimit) throws SearchServerException {
-        try { 
+        try {
             SolrQuery query = new SolrQuery();
             query.setRows(0);
             query.setQuery("*:*");
             query.addFacetField(fieldFacet);
             query.setFacetLimit(facetLimit);
             query.setFacetMinCount(1);
-            
+
             RepositoryItem catalog = (RepositoryItem) site.getPropertyValue("defaultCatalog");
             query.setFilterQueries(CATEGORY_PATH + ":" + catalog.getRepositoryId());
-            
+
             QueryResponse queryResponse = getCatalogSolrServer(locale).query(query);
             Facet facet = null;
-            if(queryResponse != null && queryResponse.getFacetFields() != null) {
-                FacetField facetField = queryResponse.getFacetField(fieldFacet);                 
-                if(facetField != null) {
+            if (queryResponse != null && queryResponse.getFacetFields() != null) {
+                FacetField facetField = queryResponse.getFacetField(fieldFacet);
+                if (facetField != null) {
                     List<Count> values = facetField.getValues();
-                    if(values != null && !values.isEmpty()) {
+                    if (values != null && !values.isEmpty()) {
                         facet = new Facet();
                         facet.setName(StringUtils.capitalize(fieldFacet));
                         List<Filter> filters = new ArrayList<Facet.Filter>();
-                        for(Count count : values) {
+                        for (Count count : values) {
                             Filter filter = new Filter();
                             filter.setName(count.getName());
                             filter.setCount(count.getCount());
@@ -385,12 +390,12 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
         } catch (SolrServerException ex) {
             throw create(SEARCH_EXCEPTION, ex);
         } catch (SolrException ex) {
-             throw create(SEARCH_EXCEPTION, ex);
+            throw create(SEARCH_EXCEPTION, ex);
         }
     }
-    
-    private SearchResponse doSearch(SolrQuery query, Site site, RepositoryItem catalog, Locale locale, boolean isSearch, FilterQuery... filterQueries)
-            throws SearchServerException {
+
+    private SearchResponse doSearch(SolrQuery query, Site site, RepositoryItem catalog, Locale locale, boolean isSearch,
+            FilterQuery... filterQueries) throws SearchServerException {
         if (site == null) {
             throw new IllegalArgumentException("Missing site");
         }
@@ -401,36 +406,37 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
 
         query.addFacetField("category");
         query.set("facet.mincount", 1);
-        
-        RuleManager ruleManager = new RuleManager(getSearchRepository(), getRulesBuilder(), getRulesSolrServer(locale));
+
+        RuleManager<T> ruleManager = new RuleManager<T>(getSearchRepository(), getRulesBuilder(), getRulesSolrServer(locale));
         if ((query.getRows() != null && query.getRows() > 0) || (query.get("group") != null && query.getBool("group"))) {
             setGroupParams(query);
             setFieldListParams(query, locale.getCountry(), catalog.getRepositoryId());
             try {
                 ruleManager.setRuleParams(filterQueries, catalog, query, isSearch);
-                
-                if(ruleManager.getRules().containsKey(SearchRepositoryItemDescriptor.REDIRECT_RULE)){
+
+                if (ruleManager.getRules().containsKey(SearchRepositoryItemDescriptor.REDIRECT_RULE)) {
                     Map<String, List<RepositoryItem>> rules = ruleManager.getRules();
                     List<RepositoryItem> redirects = rules.get(SearchRepositoryItemDescriptor.REDIRECT_RULE);
-                    if(redirects != null){
+                    if (redirects != null) {
                         RepositoryItem redirect = redirects.get(0);
-                        return new SearchResponse(query, null, null, null, (String) redirect.getPropertyValue(RedirectRuleProperty.URL), null, true);
+                        return new SearchResponse(query, null, null, null, (String) redirect.getPropertyValue(RedirectRuleProperty.URL),
+                                null, true);
                     }
                 }
-                
+
             } catch (RepositoryException ex) {
-               if (isLoggingError()) {
+                if (isLoggingError()) {
                     logError("Unable to load search rules: " + ex.getMessage());
-               }
-               throw create(SEARCH_EXCEPTION, ex);
+                }
+                throw create(SEARCH_EXCEPTION, ex);
             } catch (SolrServerException ex) {
-               if (isLoggingError()) {
-                   logError("Unable to load search rules: " + ex.getMessage());
-               }
-               throw create(SEARCH_EXCEPTION, ex);
+                if (isLoggingError()) {
+                    logError("Unable to load search rules: " + ex.getMessage());
+                }
+                throw create(SEARCH_EXCEPTION, ex);
             } catch (SolrException ex) {
                 if (isLoggingError()) {
-                   logError("Unable to load search rules: " + ex.getMessage());
+                    logError("Unable to load search rules: " + ex.getMessage());
                 }
                 throw create(SEARCH_EXCEPTION, ex);
             }
@@ -440,21 +446,21 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
 
             String correctedTerm = null;
             boolean matchesAll = true;
-            
+
             //if no results, check for spelling errors
-            if(query.getRows() > 0 && isEmptySearch(queryResponse.getGroupResponse()) && StringUtils.isNotEmpty(query.getQuery())){
-                
+            if (query.getRows() > 0 && isEmptySearch(queryResponse.getGroupResponse()) && StringUtils.isNotEmpty(query.getQuery())) {
+
                 SpellCheckResponse spellCheckResponse = queryResponse.getSpellCheckResponse();
                 //try to do searching for the corrected term matching all terms (q.op=AND)
                 QueryResponse tentativeResponse = handleSpellCheck(spellCheckResponse, getCatalogSolrServer(locale), query, "AND");
-                if(tentativeResponse != null) {
+                if (tentativeResponse != null) {
                     //if we got results, set the corrected term variable and proceed to return the results
-                    queryResponse = tentativeResponse;                    
+                    queryResponse = tentativeResponse;
                     correctedTerm = spellCheckResponse.getCollatedResult();
                 } else {
                     //if we didn't got any response, try doing another search matching any term (q.op=OR)
                     tentativeResponse = handleSpellCheck(spellCheckResponse, getCatalogSolrServer(locale), query, "OR");
-                    if(tentativeResponse != null) {
+                    if (tentativeResponse != null) {
                         //if we got results for the match any term scenario. Set similar results to true
                         //and set the corrected term.
                         queryResponse = tentativeResponse;
@@ -466,7 +472,7 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
             }
 
             long searchTime = System.currentTimeMillis() - startTime;
-         // @TODO change ths to debug mode
+            // @TODO change ths to debug mode
             if (isLoggingInfo()) {
                 logInfo("Search time is " + searchTime + ", search engine time is " + queryResponse.getQTime());
             }
@@ -474,11 +480,12 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
         } catch (SolrServerException ex) {
             throw create(SEARCH_EXCEPTION, ex);
         } catch (SolrException ex) {
-             throw create(SEARCH_EXCEPTION, ex);
+            throw create(SEARCH_EXCEPTION, ex);
         }
 
     }
 
+    
     private void setGroupParams(SolrQuery query) {
         query.set("group", true);
         query.set("group.ngroups", true);
@@ -489,44 +496,44 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
 
     private void setFieldListParams(SolrQuery query, String country, String catalog) {
         String listPrice = "listPrice" + country;
-        String salePrice =  "salePrice" + country;
+        String salePrice = "salePrice" + country;
         String dicountPercent = "discountPercent" + country;
-        if(getCatalogCollection().trim().equalsIgnoreCase("catalogEvaluation")){
-        	query.setFields("id", "productId", "title", "brand", "isToos", listPrice, salePrice, dicountPercent, "url" + country,
-                    "bayesianReviewAverage", "reviews", "isPastSeason", "freeGift" + catalog, "image","score", "isToos");
-        }
-        else{
+        if (getCatalogCollection().trim().equalsIgnoreCase("catalogEvaluation")) {
             query.setFields("id", "productId", "title", "brand", "isToos", listPrice, salePrice, dicountPercent, "url" + country,
-               "bayesianReviewAverage", "reviews", "isPastSeason", "freeGift" + catalog, "image");
+                    "bayesianReviewAverage", "reviews", "isPastSeason", "freeGift" + catalog, "image", "score", "isToos");
+        } else {
+            query.setFields("id", "productId", "title", "brand", "isToos", listPrice, salePrice, dicountPercent, "url" + country,
+                    "bayesianReviewAverage", "reviews", "isPastSeason", "freeGift" + catalog, "image");
         }
         query.setParam(GroupCollapseParams.GROUP_COLLAPSE, true);
         query.setParam(GroupCollapseParams.GROUP_COLLAPSE_FL, listPrice + "," + salePrice + "," + dicountPercent);
 
     }
 
-    private QueryResponse handleSpellCheck(SpellCheckResponse spellCheckResponse, T catalogSolrServer, SolrQuery query, String queryOp) throws SolrServerException{
-        
+    private QueryResponse handleSpellCheck(SpellCheckResponse spellCheckResponse, T catalogSolrServer, SolrQuery query, String queryOp)
+            throws SolrServerException {
+
         QueryResponse queryResponse = null;
 
-        if(spellCheckResponse != null  && StringUtils.isNotBlank(spellCheckResponse.getCollatedResult())){
+        if (spellCheckResponse != null && StringUtils.isNotBlank(spellCheckResponse.getCollatedResult())) {
             //check if we have any spelling suggestion
             String tentativeCorrectedTerm = spellCheckResponse.getCollatedResult();
 
             //if we have spelling suggestions, try doing another search using 
             //q.op as the specified queryOp param (the default one is AND so we only add it if it's OR)
             //and use q="corrected phrase" to see if we can get results
-            if("OR".equals(queryOp)){
+            if ("OR".equals(queryOp)) {
                 query.setParam("q.op", "OR");
                 query.setParam("mm", getMinimumMatch());
             }
             query.setQuery(tentativeCorrectedTerm);
             queryResponse = catalogSolrServer.query(query);
-            
+
             //if we didn't got any results from the search with q="corrected phrase" return null
             //otherwise return the results
             return isEmptySearch(queryResponse.getGroupResponse()) ? null : queryResponse;
-            
-        } else if("OR".equals(queryOp)) {
+
+        } else if ("OR".equals(queryOp)) {
             //for the match any terms scenario with no corrected terms do another query
             query.setParam("q.op", "OR");
             query.setParam("mm", getMinimumMatch());
@@ -540,10 +547,10 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
     }
 
     protected boolean isEmptySearch(GroupResponse groupResponse) {
-        boolean noResults = true;            
-        if(groupResponse != null) {
-            for(GroupCommand command : groupResponse.getValues()){
-                if(command.getNGroups() > 0){
+        boolean noResults = true;
+        if (groupResponse != null) {
+            for (GroupCommand command : groupResponse.getValues()) {
+                if (command.getNGroups() > 0) {
                     noResults = false;
                     break;
                 }
@@ -584,7 +591,7 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
     public SolrPingResponse ping() throws SearchServerException {
         return ping(Locale.ENGLISH);
     }
-    
+
     @Override
     public SolrPingResponse ping(Locale locale) throws SearchServerException {
         try {
@@ -611,7 +618,6 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
     }
 
     public UpdateResponse rollback(String collection, Locale locale) throws SearchServerException {
- 
         try {
             return getSolrServer(collection, locale).rollback();
         } catch (SolrServerException ex) {
@@ -619,9 +625,8 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
         } catch (IOException ex) {
             throw create(COMMIT_EXCEPTION, ex);
         }
-
     }
-    
+
     @Override
     public UpdateResponse commit() throws SearchServerException {
         return commit(getCatalogCollection(), Locale.ENGLISH);
@@ -637,7 +642,6 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
     }
 
     public UpdateResponse commit(String collection, Locale locale) throws SearchServerException {
- 
         try {
             return getSolrServer(collection, locale).commit();
         } catch (SolrServerException ex) {
@@ -645,7 +649,6 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
         } catch (IOException ex) {
             throw create(COMMIT_EXCEPTION, ex);
         }
-
     }
 
     @Override
@@ -666,7 +669,6 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
         UpdateRequest req = new UpdateRequest();
         req.deleteByQuery(query);
         req.setParam("collection", getCollectionName(collection, locale));
-
         try {
             return req.process(getSolrServer(collection, locale));
         } catch (SolrServerException ex) {
@@ -719,7 +721,6 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
         solrQuery.setRequestHandler("/tvrh");
         solrQuery.setFields(fields);
         solrQuery.setParam("tv.fl", "categoryName");
-
         try {
             QueryResponse queryResponse = getCatalogSolrServer(locale).query(solrQuery);
             return new SearchResponse(solrQuery, queryResponse, null, null, null, null, true);
@@ -729,12 +730,12 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
     }
 
     @Override
-    public void onRepositoryItemChanged(String repositoryName, Set<String> itemDescriptorNames)
-            throws RepositoryException, SearchServerException {
+    public void onRepositoryItemChanged(String repositoryName, Set<String> itemDescriptorNames) throws RepositoryException,
+            SearchServerException {
         if (repositoryName.endsWith(getSearchRepository().getRepositoryName())) {
             if (itemDescriptorNames.contains(SearchRepositoryItemDescriptor.SYNONYM)
                     || itemDescriptorNames.contains(SearchRepositoryItemDescriptor.SYNONYM_LIST)) {
-                // TODO: support locaclized synonyms
+                // TODO: support localized synonyms
                 exportSynonyms(Locale.ENGLISH);
                 reloadCollections();
             }
@@ -759,18 +760,14 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
     }
 
     /**
-     * Export the synonym lists in the search repository to Zoo Keeper. Each
-     * synonym list is exported into its own file. When renaming a new list or
-     * creating its synonyms won't have effect until its get configured in an
-     * analyzer.
-     *
-     * When renaming a list that is currently being use by an analyzer it won't
-     * be deleted to prevent the analyzer from breaking. However, new changes to
-     * the renamed list won't take effect.
-     *
+     * Export the synonym lists in the search repository to Zoo Keeper. Each synonym list is exported into its own file. When renaming a new
+     * list or creating its synonyms won't have effect until its get configured in an analyzer.
+     * 
+     * When renaming a list that is currently being use by an analyzer it won't be deleted to prevent the analyzer from breaking. However,
+     * new changes to the renamed list won't take effect.
+     * 
      * @throws RepositoryException
-     *             when an error occurs while retrieving synonyms from the
-     *             repository
+     *             when an error occurs while retrieving synonyms from the repository
      * @throws ExportSynonymException
      *             if an error occurs while exporting the synonym list
      */
@@ -792,8 +789,9 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
 
     /**
      * Reloads the catalog and rule collections
-     *
-     * @throws SearchServerException if an error occurs while reloading the core
+     * 
+     * @throws SearchServerException
+     *             if an error occurs while reloading the core
      */
     public void reloadCollections() throws SearchServerException {
         // @TODO add support to reload all locale cores
@@ -805,21 +803,21 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
 
     /**
      * Reloads the core
-     *
+     * 
      * @param collectionName
      *            the cored to be reloaded
-     *
-     * @throws SearchServerException if an error occurs while reloading the core
+     * 
+     * @throws SearchServerException
+     *             if an error occurs while reloading the core
      * 
      */
-     public abstract void reloadCollection(String collectionName, Locale locale) throws SearchServerException;
+    public abstract void reloadCollection(String collectionName, Locale locale) throws SearchServerException;
 
     /**
      * Indexes all repository rules in the search index
-     *
+     * 
      * @throws RepositoryException
-     *             is an exception occurs while retrieving data from the
-     *             repository
+     *             is an exception occurs while retrieving data from the repository
      * @throws SolrServerException
      *             if an exception occurs while indexing the document
      */
@@ -841,51 +839,49 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
         if (isLoggingInfo()) {
             logInfo("Started rule feed for " + ruleCount + " rules");
         }
-        
+
         int processed = 0;
-                
+
         try {
             //TODO fix this
             deleteByQuery("*:*", getRulesCollection());
-    
+
             List<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
             Integer[] rqlArgs = new Integer[] { 0, getRuleBatchSize() };
             RepositoryItem[] rules = ruleRql.executeQueryUncached(view, rqlArgs);
-        
+
             // TODO fix: add support for localized rules
-            RuleManager ruleManager = new RuleManager(getSearchRepository(), getRulesBuilder(), getRulesSolrServer(Locale.ENGLISH));
+            RuleManager<T> ruleManager = new RuleManager<T>(getSearchRepository(), getRulesBuilder(), getRulesSolrServer(Locale.ENGLISH));
             while (rules != null) {
-    
+
                 for (RepositoryItem rule : rules) {
                     docs.add(ruleManager.createRuleDocument(rule));
                     ++processed;
                 }
                 add(docs, getRulesCollection());
-    
+
                 rqlArgs[0] += getRuleBatchSize();
                 rules = ruleRql.executeQueryUncached(view, rqlArgs);
-    
+
                 if (isLoggingInfo()) {
                     logInfo("Processed " + processed + " out of " + ruleCount);
                 }
             }
-            commit(getRulesCollection());            
+            commit(getRulesCollection());
         } catch (Exception e) {
             rollback(getRulesCollection());
-            if(isLoggingError()) {
+            if (isLoggingError()) {
                 logError("Error exporting indexing rules", e);
             }
         }
 
         if (isLoggingInfo()) {
-            logInfo("Rules feed finished in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds, "
-                    + processed + " rules were indexed");
+            logInfo("Rules feed finished in " + ((System.currentTimeMillis() - startTime) / 1000) + " seconds, " + processed
+                    + " rules were indexed");
         }
     }
-    
-    
-    private List<CategoryGraph> createCategoryGraph(SearchResponse searchResponse, String path, String catalogId,
-            String categoryId) {
+
+    private List<CategoryGraph> createCategoryGraph(SearchResponse searchResponse, String path, String catalogId, String categoryId) {
 
         List<CategoryGraph> categoryGraphList = new ArrayList<CategoryGraph>();
 
@@ -925,11 +921,7 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
                     categoryGraphList = currentLevelVO.getCategoryGraphNodes();
                 } else {
                     if (isLoggingDebug()) {
-                        logDebug("The CategoryGraph is empty for catalog: "
-                                + catalogId
-                                + " and category: "
-                                + categoryId
-                                + " path: " + path
+                        logDebug("The CategoryGraph is empty for catalog: " + catalogId + " and category: " + categoryId + " path: " + path
                                 + " This is expected for leaf categories");
                     }
                 }

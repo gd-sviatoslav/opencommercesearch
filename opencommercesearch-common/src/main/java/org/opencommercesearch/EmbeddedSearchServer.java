@@ -19,8 +19,13 @@ package org.opencommercesearch;
 * under the License.
 */
 
-import atg.nucleus.ServiceException;
-import atg.repository.RepositoryItem;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Locale;
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -29,10 +34,8 @@ import org.apache.solr.client.solrj.request.CoreAdminRequest;
 import org.apache.solr.client.solrj.request.DirectXmlRequest;
 import org.apache.solr.core.CoreContainer;
 import org.apache.solr.core.SolrCore;
-
-import java.io.*;
-import java.util.Arrays;
-import java.util.Locale;
+import atg.nucleus.ServiceException;
+import atg.repository.RepositoryItem;
 
 /**
  * This class provides a SearchServer implementation which can be run as an embedded instance. By default, the configuration
@@ -300,6 +303,7 @@ public class EmbeddedSearchServer extends AbstractSearchServer<EmbeddedSolrServe
         CoreAdminRequest.unloadCore(getRulesCollection(Locale.FRENCH), deleteIndex, getRulesSolrServer(Locale.FRENCH));
     }
 
+    @SuppressWarnings("static-method")
     private EmbeddedSolrServer createEmbeddedSolrServer(final CoreContainer container, final String collectionName, final Locale locale) {
         String localizedCollectionName = collectionName + "_" + locale.getLanguage();
         return new EmbeddedSolrServer(container, localizedCollectionName);

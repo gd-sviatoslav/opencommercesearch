@@ -19,8 +19,12 @@ package org.opencommercesearch;
 * under the License.
 */
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.FacetField;
@@ -32,7 +36,6 @@ import org.opencommercesearch.repository.FacetProperty;
 import org.opencommercesearch.repository.FieldFacetProperty;
 import org.opencommercesearch.repository.QueryFacetProperty;
 import org.opencommercesearch.repository.RangeFacetProperty;
-
 import atg.repository.RepositoryItem;
 
 /**
@@ -47,6 +50,7 @@ import atg.repository.RepositoryItem;
  * @todo decouple this class from ATG
  * 
  */
+@SuppressWarnings("static-method")
 public class FacetManager {
     private Map<String, RepositoryItem> facetMap;
 
@@ -235,7 +239,7 @@ public class FacetManager {
         return facetName;
     }
 
-    public String getFacetName(RangeFacet facet) {
+    public String getFacetName(@SuppressWarnings("rawtypes") RangeFacet facet) {
         String facetName = facet.getName();
         RepositoryItem facetItem = getFacetItem(facet.getName());
         if (facetItem != null) {

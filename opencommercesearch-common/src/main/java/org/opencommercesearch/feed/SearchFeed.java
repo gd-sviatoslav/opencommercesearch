@@ -20,17 +20,19 @@ package org.opencommercesearch.feed;
 */
 
 import java.sql.SQLException;
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.opencommercesearch.SearchServer;
 import org.opencommercesearch.SearchServerException;
 import org.opencommercesearch.repository.RuleBasedCategoryProperty;
-
-import com.google.common.collect.Lists;
-
-
 import atg.commerce.inventory.InventoryException;
 import atg.nucleus.GenericService;
 import atg.repository.Repository;
@@ -46,6 +48,7 @@ import atg.repository.rql.RqlStatement;
  *
  * @TODO implement default feed functionality
  */
+@SuppressWarnings("static-method")
 public abstract class SearchFeed extends GenericService {
 
     private SearchServer searchServer;
@@ -245,6 +248,7 @@ public abstract class SearchFeed extends GenericService {
                             }
 
                             if (categoryCatalogs != null) {
+                                @SuppressWarnings("unchecked")
                                 Set<RepositoryItem> catalogs = (Set<RepositoryItem>) productCategory.getPropertyValue("catalogs");
                                 for(RepositoryItem catalog : catalogs){
                                     if(catalogAssignments.contains(catalog)){
@@ -316,6 +320,7 @@ public abstract class SearchFeed extends GenericService {
         
         boolean isAssigned = false;
         
+        @SuppressWarnings("unchecked")
         Set<RepositoryItem> categoryCatalogs = (Set<RepositoryItem>) category.getPropertyValue("catalogs"); 
         if (categoryCatalogs != null) { 
             for (RepositoryItem categoryCatalog : categoryCatalogs) { 
@@ -345,6 +350,7 @@ public abstract class SearchFeed extends GenericService {
     private void loadCategoryPathsAndAncestorIds(SolrInputDocument document, RepositoryItem category,
             List<RepositoryItem> hierarchyCategories, Set<RepositoryItem> catalogAssignments, Set<String> tokenCache,
             Set<String> ancestorCache) {
+        @SuppressWarnings("unchecked")
         Set<RepositoryItem> parentCategories = (Set<RepositoryItem>) category.getPropertyValue("fixedParentCategories");
 
         if (parentCategories != null && parentCategories.size() > 0) {
@@ -354,6 +360,7 @@ public abstract class SearchFeed extends GenericService {
             }
             hierarchyCategories.remove(0);
         } else {
+            @SuppressWarnings("unchecked")
             Set<RepositoryItem> catalogs = (Set<RepositoryItem>) category.getPropertyValue("catalogs");
             for(RepositoryItem catalog : catalogs){
                 if(catalogAssignments.contains(catalog)){

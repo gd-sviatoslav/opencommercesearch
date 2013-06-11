@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.FacetField;
@@ -37,7 +36,6 @@ import org.apache.solr.common.params.FacetParams;
 import org.opencommercesearch.Facet.Filter;
 import org.opencommercesearch.repository.FacetProperty;
 import org.opencommercesearch.repository.RangeFacetProperty;
-
 import atg.repository.RepositoryItem;
 
 /**
@@ -47,6 +45,7 @@ import atg.repository.RepositoryItem;
  * @author rmerizalde
  * 
  */
+@SuppressWarnings("static-method")
 public class SearchResponse {
 
     private SolrQuery query;

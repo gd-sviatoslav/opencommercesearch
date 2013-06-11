@@ -36,6 +36,7 @@
 		<module>opencommercesearch-common</module>
 		<module>opencommercesearch-solr</module>
 		<module>opencommercesearch-pub</module>
+		<module>opencommercesearch-samplestore</module>
 	</modules>
 
 	<dependencyManagement>

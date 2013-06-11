@@ -19,9 +19,29 @@ package org.opencommercesearch;
 * under the License.
 */
 
-import java.util.*;
+import static org.opencommercesearch.repository.RankingRuleProperty.ATTRIBUTE;
+import static org.opencommercesearch.repository.RankingRuleProperty.BOOST_BY;
+import static org.opencommercesearch.repository.RankingRuleProperty.BOOST_BY_FACTOR;
+import static org.opencommercesearch.repository.RankingRuleProperty.STRENGTH;
+import static org.opencommercesearch.repository.RankingRuleProperty.STRENGTH_LEVELS;
+import static org.opencommercesearch.repository.RankingRuleProperty.STRENGTH_MAXIMUM_BOOST;
+import static org.opencommercesearch.repository.RankingRuleProperty.STRENGTH_MAXIMUM_DEMOTE;
+import static org.opencommercesearch.repository.RankingRuleProperty.STRENGTH_MEDIUM_BOOST;
+import static org.opencommercesearch.repository.RankingRuleProperty.STRENGTH_MEDIUM_DEMOTE;
+import static org.opencommercesearch.repository.RankingRuleProperty.STRENGTH_NEUTRAL;
+import static org.opencommercesearch.repository.RankingRuleProperty.STRENGTH_STRONG_BOOST;
+import static org.opencommercesearch.repository.RankingRuleProperty.STRENGTH_STRONG_DEMOTE;
+import static org.opencommercesearch.repository.RankingRuleProperty.STRENGTH_WEAK_BOOST;
+import static org.opencommercesearch.repository.RankingRuleProperty.STRENGTH_WEAK_DEMOTE;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
-
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
@@ -31,13 +51,16 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
-import org.opencommercesearch.repository.*;
-
+import org.opencommercesearch.repository.BlockRuleProperty;
+import org.opencommercesearch.repository.BoostRuleProperty;
+import org.opencommercesearch.repository.CategoryProperty;
+import org.opencommercesearch.repository.FacetProperty;
+import org.opencommercesearch.repository.FacetRuleProperty;
+import org.opencommercesearch.repository.RuleProperty;
+import org.opencommercesearch.repository.SearchRepositoryItemDescriptor;
 import atg.repository.Repository;
 import atg.repository.RepositoryException;
 import atg.repository.RepositoryItem;
-
-import static org.opencommercesearch.repository.RankingRuleProperty.*;
 
 /**
  * This class provides functionality to load the rules that matches a given
@@ -46,8 +69,8 @@ import static org.opencommercesearch.repository.RankingRuleProperty.*;
  * @author rmerizalde
  *
  * @todo decouple this class from ATG
- * 
  */
+@SuppressWarnings("static-method")
 public class RuleManager<T extends SolrServer> {
     public static final String FIELD_CATEGORY = "category";
     public static final String FIELD_ID = "id";
@@ -70,7 +93,7 @@ public class RuleManager<T extends SolrServer> {
 
     enum RuleType {
         facetRule() {
-            void setParams(RuleManager manager, SolrQuery query, List<RepositoryItem> rules, Map<String, SolrDocument> ruleDocs) {
+            void setParams(RuleManager<?> manager, SolrQuery query, List<RepositoryItem> rules, Map<String, SolrDocument> ruleDocs) {
                 if (rules == null || rules.size() == 0) {
                     return;
                 }
@@ -78,13 +101,13 @@ public class RuleManager<T extends SolrServer> {
                 FacetManager facetManager = manager.getFacetManager();
 
                 for (RepositoryItem rule : rules) {
-                    @SuppressWarnings("unchecked")
                     SolrDocument doc = ruleDocs.get(rule.getRepositoryId());
 
                     if (FacetRuleProperty.COMBINE_MODE_REPLACE.equals(doc.getFieldValue(FacetRuleProperty.COMBINE_MODE))) {
                         facetManager.clear();
                     }
 
+                    @SuppressWarnings("unchecked")
                     List<RepositoryItem> facets = (List<RepositoryItem>) rule.getPropertyValue(FacetRuleProperty.FACETS);
                     if (facets != null) {
                         for (RepositoryItem facet : facets) {
@@ -96,7 +119,8 @@ public class RuleManager<T extends SolrServer> {
             }
         },
         boostRule() {
-            void setParams(RuleManager manager, SolrQuery query, List<RepositoryItem> rules, Map<String, SolrDocument> ruleDocs) {
+            @SuppressWarnings("deprecation")
+            void setParams(RuleManager<?> manager, SolrQuery query, List<RepositoryItem> rules, Map<String, SolrDocument> ruleDocs) {
                 String[] sortFields = query.getSortFields();
                 if (sortFields != null && sortFields.length > 1) {
                     // user has selected a sorting option, ignore manual boosts
@@ -124,7 +148,7 @@ public class RuleManager<T extends SolrServer> {
             }
         },
         blockRule() {
-            void setParams(RuleManager manager, SolrQuery query, List<RepositoryItem> rules, Map<String, SolrDocument> ruleDocs) {
+            void setParams(RuleManager<?> manager, SolrQuery query, List<RepositoryItem> rules, Map<String, SolrDocument> ruleDocs) {
 
                 for (RepositoryItem rule : rules) {
                     @SuppressWarnings("unchecked")
@@ -143,7 +167,7 @@ public class RuleManager<T extends SolrServer> {
         redirectRule() {
 
             @Override
-            void setParams(RuleManager manager, SolrQuery query, List<RepositoryItem> rules, Map<String, SolrDocument> ruleDocs) {
+            void setParams(RuleManager<?> manager, SolrQuery query, List<RepositoryItem> rules, Map<String, SolrDocument> ruleDocs) {
                 //TODO gsegura: for redirect rule we don't need a enum entry to add parameters to the query
                 //but to avoid an exception while on:  RuleType.valueOf(entry.getKey());  we are adding
                 //this empty entry. The redirect itself will be handled by the abstractSearchServer
@@ -152,7 +176,7 @@ public class RuleManager<T extends SolrServer> {
         },
         rankingRule() {
             @Override
-            void setParams(RuleManager manager, SolrQuery query, List<RepositoryItem> rules, Map<String, SolrDocument> ruleDocs) {
+            void setParams(RuleManager<?> manager, SolrQuery query, List<RepositoryItem> rules, Map<String, SolrDocument> ruleDocs) {
                 for (RepositoryItem rule : rules) {
                     SolrDocument doc = ruleDocs.get(rule.getRepositoryId());
 
@@ -167,7 +191,7 @@ public class RuleManager<T extends SolrServer> {
             }
         };
         
-        abstract void setParams(RuleManager manager, SolrQuery query, List<RepositoryItem> rules, Map<String, SolrDocument> ruleDocs);
+        abstract void setParams(RuleManager<?> manager, SolrQuery query, List<RepositoryItem> rules, Map<String, SolrDocument> ruleDocs);
     }
 
     RuleManager(Repository searchRepository, RulesBuilder rulesBuilder, T server) {
@@ -199,6 +223,7 @@ public class RuleManager<T extends SolrServer> {
      * @throws SolrServerException
      *             if an exception happens querying the search engine
      */
+    @SuppressWarnings("deprecation")
     void loadRules(String q, String categoryFilterQuery, boolean isSearch, RepositoryItem catalog) throws RepositoryException,
             SolrServerException {
         if (isSearch && StringUtils.isBlank(q)) {
@@ -231,6 +256,7 @@ public class RuleManager<T extends SolrServer> {
         }
                 
         filterQueries.append(") AND ").append("(siteId:").append(WILDCARD);
+        @SuppressWarnings("unchecked")
         Set<String> siteSet = (Set<String>) catalog.getPropertyValue("siteIds");
         if (siteSet != null) {
             for(String site : siteSet) {
@@ -303,7 +329,7 @@ public class RuleManager<T extends SolrServer> {
     /**
      * Return true if the given query is an exact match, owtherwise false. The exact match syntax is to put the query
      * in the rule between brackets. For example ("the bike").
-     */
+     */    
     private boolean isExactMatch(String query) {
         return query != null && query.startsWith("[") && query.endsWith("]");
     }
@@ -332,6 +358,7 @@ public class RuleManager<T extends SolrServer> {
     }
 
     // Helper method to process the rules for this request
+    @SuppressWarnings("deprecation")
     void setRuleParams(SolrQuery query, Map<String, List<RepositoryItem>> rules, Map<String, SolrDocument> ruleDocs) {
         if (rules == null) {
             return;
@@ -344,7 +371,7 @@ public class RuleManager<T extends SolrServer> {
 
         // add sort specs after the isToos and possibly
         if (sortFields != null) {
-            Set sortFieldSet = new HashSet(sortFields.length);
+            Set<String> sortFieldSet = new HashSet<String>(sortFields.length);
 
             for (String sortField : sortFields) {
                 String[] parts = StringUtils.split(sortField, ' ');
@@ -360,7 +387,7 @@ public class RuleManager<T extends SolrServer> {
 
         for (Entry<String, List<RepositoryItem>> entry : rules.entrySet()) {
             RuleType type = RuleType.valueOf(entry.getKey());
-
+            
             if (type != null) {
                 type.setParams(this, query, entry.getValue(), ruleDocs);
             }
@@ -516,6 +543,7 @@ public class RuleManager<T extends SolrServer> {
     }
 
     private void setFacetRuleFields(RepositoryItem rule, SolrInputDocument doc) {
+        @SuppressWarnings("unchecked")
         List<RepositoryItem> facets = (List<RepositoryItem>) rule.getPropertyValue(FacetRuleProperty.FACETS);
 
         for (RepositoryItem facet : facets) {
@@ -574,7 +602,7 @@ public class RuleManager<T extends SolrServer> {
     }
 
     /**
-     * Initializes the strenght map.
+     * Initializes the strength map.
      *
      * @TODO move this mappings to configuration file
      */

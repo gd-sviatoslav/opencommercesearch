@@ -22,15 +22,10 @@ package org.opencommercesearch;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.util.ClientUtils;
-import org.opencommercesearch.repository.CategoryProperty;
 import org.opencommercesearch.repository.RankingRuleProperty;
 import org.opencommercesearch.repository.RuleBasedCategoryProperty;
 import org.opencommercesearch.repository.RuleExpressionProperty;
-
 import atg.nucleus.GenericService;
 import atg.repository.Repository;
 import atg.repository.RepositoryException;
@@ -41,7 +36,6 @@ import atg.repository.RepositoryItem;
  * category.
  * 
  * @author gsegura
- * 
  */
 public class RulesBuilder extends GenericService {
 
@@ -147,6 +141,7 @@ public class RulesBuilder extends GenericService {
         return buildFilter(null, getExpressions(rankingRule, RankingRuleProperty.CONDITIONS), locale);
     }
     
+    @SuppressWarnings("static-method")
     private List<RepositoryItem> getExpressions(RepositoryItem ruleBasedItem, String propertyName) {
         @SuppressWarnings("unchecked")
         List<RepositoryItem> expressions = (List<RepositoryItem>) ruleBasedItem
@@ -218,6 +213,7 @@ public class RulesBuilder extends GenericService {
         return filter.toString().trim();
     }
 
+    @SuppressWarnings("static-method")
     private String getOperator(RepositoryItem ruleItem) {
         String operator = (String) ruleItem.getPropertyValue(RuleExpressionProperty.OPERATOR);
 
