@@ -21,12 +21,14 @@ package org.opencommercesearch.sample.store;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.opencommercesearch.feed.SearchFeed;
 import atg.commerce.inventory.InventoryException;
 import atg.repository.RepositoryException;
 import atg.repository.RepositoryItem;
+import atg.repository.RepositoryItemDescriptor;
 import com.google.common.collect.Lists;
 
 /**
@@ -59,6 +61,15 @@ public class SampleStoreIndexer extends SearchFeed {
         ATGLoggingUtil.info(this, "Feed import finished, indexStamp=[{0}].", indexStamp);
     }
 
+    /**
+     * Calls {@link #loadCategoryPaths(SolrInputDocument, RepositoryItem, Set, Set)} with catalogAssignments from the product and 'null' as categoryCatalogs. 
+     */
+    protected void loadCategoryPaths(SolrInputDocument document, RepositoryItem product) {        
+        @SuppressWarnings("unchecked")
+        Set<RepositoryItem> catalogAssignments = (Set<RepositoryItem>) product.getPropertyValue("catalogs");
+        super.loadCategoryPaths(document, product, catalogAssignments, null);
+    }
+    
     @Override
     protected void processProduct(RepositoryItem product, Map<Locale, List<SolrInputDocument>> documents) throws RepositoryException,
             InventoryException {
@@ -68,12 +79,17 @@ public class SampleStoreIndexer extends SearchFeed {
             documents.put(DEFAULT_LOCALE, docs);
         }
         SolrInputDocument doc = new SolrInputDocument();
-        // todo now sl: load fields by schema 
+
+        // todo now sl: load fields by schema configuration
+        RepositoryItemDescriptor meta = product.getItemDescriptor();
+        String[] propNames = meta.getPropertyNames();
+        for (String name : propNames) {
+            doc.setField(name, product.getPropertyValue(name));
+        }
+ 
+        loadCategoryPaths(doc, product);
         
-        // loadCategoryPaths(doc, product, catalogAssignments, categoryCatalogs);
-        
-        
-        // todo now sl: implement this
+        docs.add(doc);
     }
 
 }
