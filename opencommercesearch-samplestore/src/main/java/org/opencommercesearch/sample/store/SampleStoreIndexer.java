@@ -71,8 +71,7 @@ public class SampleStoreIndexer extends SearchFeed {
     }
     
     @Override
-    protected void processProduct(RepositoryItem product, Map<Locale, List<SolrInputDocument>> documents) throws RepositoryException,
-            InventoryException {
+    protected void processProduct(RepositoryItem product, Map<Locale, List<SolrInputDocument>> documents) throws RepositoryException, InventoryException {
         List<SolrInputDocument> docs = documents.get(DEFAULT_LOCALE);
         if(null == docs){
             docs = Lists.newArrayList();

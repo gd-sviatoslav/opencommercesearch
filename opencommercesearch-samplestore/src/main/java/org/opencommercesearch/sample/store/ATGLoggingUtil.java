@@ -19,13 +19,39 @@
 package org.opencommercesearch.sample.store;
 
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.TimeZone;
 import atg.nucleus.GenericService;
 
 /**
  * @author S.L. (slisenkin at griddynamics dot com) 11.06.2013 17:32:03
  */
 public final class ATGLoggingUtil {
+    
+    /**
+     * Format date as: yyyy-MM-dd__HH:mm:ss.SSS
+     */
+    public static final SimpleDateFormat FORMAT_DATE = createGmt("yyyy-MM-dd__HH:mm:ss.SSS");
 
+    /**
+     * Creates dates formatting utility with GMT time zone setting.
+     * 
+     * @param pattern date pattern
+     * @return dates formatting utility with GMT time zone
+     */
+    public static SimpleDateFormat createGmt(final String pattern) {
+      final SimpleDateFormat fmt = new SimpleDateFormat(pattern, Locale.ENGLISH);
+      fmt.setTimeZone(TimeZone.getTimeZone("GMT"));
+      return fmt;
+    }
+    
+    public static void debug(GenericService inst, String msg, Object... params) {
+        if (inst.isLoggingDebug()) {
+            inst.logDebug(MessageFormat.format(msg, params));
+        }
+    }
+    
     public static void info(GenericService inst, String msg, Object... params) {
         if (inst.isLoggingInfo()) {
             inst.logInfo(MessageFormat.format(msg, params));
