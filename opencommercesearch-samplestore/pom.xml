@@ -56,21 +56,21 @@
 								<descriptor>src/main/assembly/module-with-deps.xml</descriptor>
 							</descriptors>
 							<appendAssemblyId>false</appendAssemblyId>
-							<finalName>ocs-sample-store</finalName>
+							<finalName>ocs-catalog-indexer</finalName>
 						</configuration>
 					</execution>
 					<execution>
-						<id>demo-configuration</id>
+						<id>production-configuration</id>
 						<phase>package</phase>
 						<goals>
 							<goal>single</goal>
 						</goals>
 						<configuration>
 							<descriptors>
-								<descriptor>src/main/assembly/democonfig.xml</descriptor>
+								<descriptor>src/main/assembly/config_production.xml</descriptor>
 							</descriptors>
 							<appendAssemblyId>false</appendAssemblyId>
-							<finalName>ocs-sample-store-democonfig</finalName>
+							<finalName>ocs-catalog-indexer-config</finalName>
 						</configuration>
 					</execution>
 				</executions>
