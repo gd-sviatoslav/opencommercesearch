@@ -12,6 +12,12 @@
       <not><tableExists tableName="cs_synonym"/></not>
     </preConditions>
 
+    <rollback>    
+      <dropTable tableName="cs_syn_list_mapping"/>
+      <dropTable tableName="cs_synonym_list"/>
+      <dropTable tableName="cs_synonym"/>
+    </rollback>
+
     <createTable tableName="cs_synonym_list">
       <column name="syn_list_id" type="VARCHAR2(40 BYTE)">
         <constraints nullable="false"/>
@@ -84,6 +90,7 @@
       <column name="checkin_date" type="TIMESTAMP"/>
     </createTable>
     <addPrimaryKey tableName="cs_synonym" columnNames="syn_id,asset_version" constraintName="cs_synonym_pk"/>
+
   </changeSet>
 
   <changeSet author="commercesearch" id="2">
@@ -94,6 +101,7 @@
             WHERE id='EsPvSynonymMapping'
         </sqlCheck>
     </preConditions>
+
     <!-- Property View for Synonym's mapping property -->
     <insert tableName="vmap_pv">
         <column name="id" value="EsPvSynonymMapping"/>
@@ -123,6 +131,7 @@
         <column name="description" value=""/>
         <column name="default_value" value="atg.remote.commerce.Resources"/>
     </insert>
+
 
     <!-- linke Propevety VIew attributes to Property View -->
     <insert tableName="vmap_pv2pvad_rel">
@@ -203,6 +212,24 @@
       <column name="sequence_num" value="0"/>
       <column name="view_id" value="EsIvmSynonymMapping"/>
     </insert>
+
+    <rollback>    
+      DELETE * FROM vmap_im2ivm_rel WHERE item_id='EsImSynonymMapping' and view_id='EsIvmSynonymMapping';
+      DELETE * FROM vmap_im WHERE id='EsImSynonymMapping';
+      DELETE * FROM vmap_ivm2pvm_rel WHERE ivm_id='EsIvmSynonymMapping' and pvm_id='EsPvmSynonymMapping';
+      DELETE * FROM vmap_attrval_rel WHERE mapper_id='EsIvmSynonymMapping' and attribute_id='EsAvSynonymBnd';
+      DELETE * FROM vmap_attrval_rel WHERE mapper_id='EsIvmSynonymMapping' and attribute_id='EsAvSynonymAdvProp';
+      DELETE * FROM vmap_attrval WHERE id='EsAvSynonymBnd';
+      DELETE * FROM vmap_attrval WHERE id='EsAvSynonymAdvProp';
+      DELETE * FROM vmap_ivm WHERE id='EsIvmSynonymMapping';
+      DELETE * FROM vmap_pvm WHERE id='EsPvmSynonymMapping';
+      DELETE * FROM vmap_pv2pvad_rel WHERE view_id='EsPvSynonymMapping' and attr_id='EsPvAdSynonymMappingResBund';
+      DELETE * FROM vmap_pv2pvad_rel WHERE view_id='EsPvSynonymMapping' and attr_id='EsPvAdDefSynonymMappingPropSvc';
+      DELETE * FROM vmap_pvattrdef WHERE id='EsPvAdSynonymMappingResBund';
+      DELETE * FROM vmap_pvattrdef WHERE id='EsPvAdDefSynonymMappingPropSvc';
+      DELETE * FROM vmap_pv WHERE id='EsPvSynonymMapping';
+    </rollback>
+
   </changeSet>
 
   <changeSet author="commercesearch" id="3">
@@ -291,6 +318,13 @@
        </column>
     </createTable>
     <addPrimaryKey tableName="cs_rule_cats" columnNames="rule_id,category_id,asset_version" constraintName="cs_rule_cats_pk"/>
+
+    <rollback>    
+      <dropTable tableName="cs_rule_cats"/>
+      <dropTable tableName="cs_rule_catalogs"/>
+      <dropTable tableName="cs_rule_sites"/>
+      <dropTable tableName="cs_rule"/>
+    </rollback>
   </changeSet>
 
   <changeSet author="commercesearch" id="4">
@@ -347,6 +381,14 @@
       </column>
     </createTable>
     <addPrimaryKey tableName="cs_block_rule_prods" columnNames="rule_id,product_id,asset_version" constraintName="cs_block_rule_prod_pk"/>    
+
+    <rollback>    
+      <dropTable tableName="cs_block_rule_prods"/>
+      <dropTable tableName="cs_block_rule"/>
+      <dropTable tableName="cs_boost_rule_prods"/>
+      <dropTable tableName="cs_boost_rule"/>
+    </rollback>
+
   </changeSet>
 
   <changeSet author="commercesearch" id="5">
@@ -424,6 +466,12 @@
       </column>      
     </createTable>
     <addPrimaryKey tableName="cs_field_facet" columnNames="facet_id,asset_version" constraintName="cs_field_facet_pk"/>
+
+    <rollback>
+      <dropTable tableName="cs_field_facet"/>
+      <dropTable tableName="cs_field_facet"/>
+      <dropTable tableName="cs_facet"/>
+    </rollback>
   </changeSet>
 
   <changeSet author="commercesearch" id="6">
@@ -454,6 +502,11 @@
       </column>
     </createTable>
     <addPrimaryKey tableName="cs_facet_rule_facets" columnNames="rule_id,facet_id,asset_version" constraintName="cs_facet_rule_facet_pk"/>
+
+    <rollback>
+      <dropTable tableName="cs_facet_rule_facets"/>
+      <dropTable tableName="cs_facet_rule"/>
+    </rollback>
   </changeSet>
 
   <changeSet author="commercesearch" id="7">
@@ -461,6 +514,7 @@
       <not><tableExists tableName="cs_range_facet"/></not>
       <not><tableExists tableName="cs_date_facet"/></not>
     </preConditions>
+
     <createTable tableName="cs_range_facet">
       <column name="facet_id" type="VARCHAR2(40 BYTE)">
           <constraints nullable="false" />
@@ -510,6 +564,11 @@
       </column>
     </createTable>
     <addPrimaryKey tableName="cs_date_facet" columnNames="facet_id,asset_version" constraintName="cs_date_facet_pk"/>
+
+    <rollback>
+      <dropTable tableName="cs_date_facet"/>
+      <dropTable tableName="cs_range_facet"/>
+    </rollback>
   </changeSet>
 
   <changeSet author="commercesearch" id="8">
@@ -517,6 +576,7 @@
       <not><tableExists tableName="cs_query_facet"/></not>
       <not><tableExists tableName="cs_query_facet_queries"/></not>
     </preConditions>
+
     <createTable tableName="cs_query_facet">
       <column name="facet_id" type="VARCHAR2(40 BYTE)">
           <constraints nullable="false" />
@@ -545,6 +605,11 @@
       </column>
     </createTable>
     <addPrimaryKey tableName="cs_query_facet_queries" columnNames="facet_id,seq_num,asset_version" constraintName="cs_query_facet_queries_pk"/>
+
+    <rollback>
+      <dropTable tableName="cs_query_facet_queries"/>
+      <dropTable tableName="cs_query_facet"/>
+    </rollback>
   </changeSet>
   
   <changeSet author="commercesearch" id="9">
@@ -563,6 +628,9 @@
        </column>
     </createTable>
     <addPrimaryKey tableName="cs_redirect_rule" columnNames="rule_id,asset_version" constraintName="cs_redirect_rule_pk"/>
+    <rollback>
+      <dropTable tableName="cs_redirect_rule"/>
+    </rollback>
   </changeSet>
   
    <changeSet author="commercesearch" id="10">
@@ -570,6 +638,7 @@
             <not><tableExists tableName="cs_rule_expression"/></not>
             <not><tableExists tableName="cs_category_rule_expression"/></not>
       </preConditions>
+
       <createTable tableName="cs_rule_expression">
           <column name="id" type="VARCHAR2(40 BYTE)">
               <constraints nullable="false"/>
@@ -600,6 +669,7 @@
           <column name="pred_version" type="NUMBER(19)"/>
           <column name="checkin_date" type="TIMESTAMP"/>
       </createTable>
+
       <createTable tableName="cs_category_rule_expression">
           <column name="category_id" type="VARCHAR2(40 BYTE)">
             <constraints nullable="false"/>
@@ -614,6 +684,12 @@
         </createTable>
       <addPrimaryKey tableName="cs_rule_expression" columnNames="id,asset_version" constraintName="cs_rule_expression_pk"/>
       <addPrimaryKey tableName="cs_category_rule_expression" columnNames="category_id,rule_expression_id,position,asset_version" constraintName="cs_cat_rul_exp_pk"/>
+
+      <rollback>
+        <dropTable tableName="cs_category_rule_expression"/>
+        <dropTable tableName="cs_rule_expression"/>
+      </rollback>
+
   </changeSet>
 
   <changeSet author="commercesearch" id="11">
@@ -625,6 +701,7 @@
         UPDATE vmap_im SET item_path = '/org/opencommercesearch/repository/SearchRepository'
          WHERE item_path = '/org/commercesearch/repository/SearchRepository'
     </sql>
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="17">
@@ -665,6 +742,11 @@
       </column>
     </createTable>
     <addPrimaryKey tableName="cs_ranking_rule_expression" columnNames="rule_id,rule_expression_id,position,asset_version" constraintName="cs_ranking_rule_expr_pk"/>
+
+    <rollback>
+      <dropTable tableName="cs_ranking_rule_expression"/>
+      <dropTable tableName="cs_ranking_rule"/>
+    </rollback>
   </changeSet>
   
   <changeSet author="commercesearch" id="19">
@@ -672,6 +754,7 @@
         UPDATE vmap_attrval SET attr_value = 'org.opencommercesearch.ca.BCCResources'
          WHERE id ='EsAvSynonymBnd'
     </sql>
+    <rollback/>    
   </changeSet> 
 
  <changeSet author="commercesearch" id="20">
@@ -684,6 +767,7 @@
             <constraints nullable="true"/>
         </column>
     </addColumn>
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="21">
@@ -691,6 +775,7 @@
             <not><sqlCheck expectedResult="0">select count(*) from cs_rule where target is null</sqlCheck></not>
         </preConditions>
         <sql>update cs_rule set target='1' where target is null;</sql>
+    <rollback/>
   </changeSet>
 
   <changeSet author="commercesearch" id="22">
@@ -732,7 +817,17 @@
             <column name="name" value="AssetManager RuleTarget itemViewMapping" />
             <column name="description" value="AssetManager RuleTarget itemViewMapping" />
         </insert>
-    </changeSet>
+
+
+    <rollback>
+      DELETE * FROM vmap_ivm WHERE id='EsIvmRuleTarget';
+      DELETE * FROM vmap_im2ivm_rel WHERE item_id='EsImRuleTarget' and view_id='AmIvmDef';
+      DELETE * FROM vmap_attrval_rel WHERE attribute_id='AmAvDefBnd' and mapper_id='EsIvmRuleTarget';
+      DELETE * FROM vmap_im WHERE id='EsImRuleTarget';
+      DELETE * FROM vmap_fh WHERE id='EsFhRuleTarget';
+    </rollback>
+
+  </changeSet>
   
   <changeSet author="commercesearch" id="23">
     <preConditions onFail="MARK_RAN">
@@ -754,6 +849,7 @@
       </sqlCheck></not>
     </preConditions>
     <dropNotNullConstraint tableName="cs_rule" columnName="query"/>    
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="24">
@@ -766,6 +862,7 @@
             <constraints nullable="true"/>
         </column>
     </addColumn>
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="25">
@@ -773,6 +870,7 @@
             <not><sqlCheck expectedResult="0">select count(*) from cs_rule where target = '1' and type = '5'</sqlCheck></not>
         </preConditions>
         <sql>update cs_rule set target='2' where target = '1' and type = '5';</sql>
+    <rollback/> 
   </changeSet>
   
   <changeSet author="commercesearch" id="26">
@@ -785,6 +883,7 @@
             <constraints nullable="true"/>
         </column>
     </addColumn>
+    <rollback/>    
   </changeSet>
   
   <changeSet author="commercesearch" id="27">
@@ -800,6 +899,7 @@
             <constraints nullable="true"/>
         </column>
     </addColumn>
+    <rollback/>    
   </changeSet> 
   
   <changeSet author="commercesearch" id="28">
@@ -822,6 +922,7 @@
       </sqlCheck>
     </preConditions>
     <addNotNullConstraint tableName="cs_rule" columnName="target"/>    
+    <rollback/>
   </changeSet> 
   
   <changeSet author="commercesearch" id="29">
@@ -845,6 +946,7 @@
     </preConditions>
     <sql>UPDATE cs_ranking_rule SET notes='Update me' WHERE notes IS NULL</sql>
     <addNotNullConstraint tableName="cs_ranking_rule" columnName="notes"/>    
+    <rollback/>    
   </changeSet> 
   
   <changeSet author="commercesearch" id="30">
@@ -862,6 +964,7 @@
             <constraints nullable="true"/>
         </column>
     </addColumn>  
+    <rollback/>
   </changeSet>    
         
   <changeSet author="commercesearch" id="31">
@@ -871,6 +974,7 @@
     <addColumn tableName="cs_facet_rule_facets">
         <column name="position" type="number(19)" defaultValueNumeric="0" />
     </addColumn>  
+    <rollback/>
   </changeSet>   
   
   <changeSet author="commercesearch" id="32">
@@ -879,6 +983,7 @@
     </preConditions>     
     <dropPrimaryKey tableName="cs_facet_rule_facets" constraintName="cs_facet_rule_facet_pk"/>
     <addPrimaryKey tableName="cs_facet_rule_facets" columnNames="rule_id,facet_id,position,asset_version" constraintName="cs_facet_rule_facet_pk"/>
+    <rollback/>
   </changeSet> 
   
   <changeSet author="commercesearch" id="33">
@@ -886,6 +991,7 @@
         <tableExists tableName="cs_facet_rule_facets"/>
     </preConditions>
     <sql>DELETE cs_facet_rule_facets WHERE position = 0</sql>
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="34">
@@ -901,6 +1007,7 @@
     <sql>UPDATE cs_facet SET system_name = name</sql>
 
     <addNotNullConstraint tableName="cs_facet" columnName="system_name" />
+    <rollback/>
   </changeSet>   
   
   <changeSet author="commercesearch" id="35">
@@ -916,6 +1023,7 @@
     <sql>UPDATE cs_rule SET include_subcats = 1</sql>
 
     <addNotNullConstraint tableName="cs_rule" columnName="include_subcats" />
+    <rollback/>
   </changeSet> 
   
   <changeSet author="commercesearch" id="36">
@@ -925,6 +1033,7 @@
     </preConditions>
 
     <modifyDataType tableName="cs_redirect_rule" columnName="url" newDataType="VARCHAR2(1024)"/>
+    <rollback/>
   </changeSet> 
   
   <changeSet author="commercesearch" id="37">
@@ -934,6 +1043,7 @@
     </preConditions>
 
     <modifyDataType tableName="cs_rule" columnName="name" newDataType="VARCHAR2(256)"/>
+    <rollback/>
   </changeSet>
 
   <changeSet author="commercesearch" id="38">
@@ -955,6 +1065,10 @@
         <constraints nullable="false" />
       </column>
     </createTable>
+    
+    <rollback>
+      <dropTable tableName="cs_acls"/>
+    </rollback>
   </changeSet>
 
   <changeSet author="commercesearch" id="39">
@@ -984,6 +1098,8 @@
     <addColumn tableName="cs_synonym_list">
         <column name="item_owner" type="VARCHAR2(128)"/>
     </addColumn>
+  
+    <rollback/>
   </changeSet>                
 
   <changeSet author="commercesearch" id="40">
@@ -1000,6 +1116,10 @@
       </column>
       <column name="blacklist_term" type="VARCHAR2(254 BYTE)"/>
     </createTable>
+    
+    <rollback>
+      <dropTable tableName="cs_facet_blacklist"/>
+    </rollback>
   </changeSet>
 
   <changeSet author="commercesearch" id="41">
@@ -1009,6 +1129,7 @@
     </preConditions>
 
     <dropColumn tableName="cs_facet_blacklist" columnName="seq_num"/>
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="42">
@@ -1027,6 +1148,7 @@
 
     <addNotNullConstraint tableName="cs_synonym" columnName="syn_list_id" />
     <dropTable cascadeConstraints="true" tableName="cs_syn_list_mapping"/>
+    <rollback/>
   </changeSet>          
                                                         
   <changeSet author="commercesearch" id="43">
@@ -1045,6 +1167,7 @@
     <sql>update cs_synonym_list set fileName = 'facet_synonyms' where name ='Facet Synonyms'</sql>
                                                                           
     <addNotNullConstraint tableName="cs_synonym_list" columnName="fileName" />
+    <rollback/>
    </changeSet>          
   
   <!-- Start of  US6144 (Need add'l publishing safeguards for adding/modyfing Solr assets in the BCC search respository -->
@@ -1123,7 +1246,7 @@
     <addNotNullConstraint tableName="cs_rule" columnName="rationale" />
     <addNotNullConstraint tableName="cs_synonym_list" columnName="rationale" />
     <addNotNullConstraint tableName="cs_synonym" columnName="rationale" />
-
+    <rollback/>
   </changeSet>
 
   <!-- Cleanup form handler for synonym mappings (registering a new one) -->
@@ -1138,7 +1261,7 @@
     </preConditions>
 
     <sql>delete from vmap_im WHERE id='EsImSynonymMapping'</sql>
-
+    <rollback/>
   </changeSet>
   
   <!-- Register necessary form handlers for each asset -->
@@ -1182,6 +1305,7 @@
         <column name="view_id" value="AmIvmDef" />
         <column name="sequence_num" value="0" />
     </insert>
+
     <insert tableName="vmap_ivm">
         <column name="id" value="EsIvmSearchAssetTarget" />
         <column name="display_name" value="AssetManager SearchAssetTarget itemViewMapping" />
@@ -1223,6 +1347,20 @@
         <column name="name" value="AssetManager SynonymMappingsTarget itemViewMapping" />
         <column name="description" value="AssetManager SynonymMappingsTarget itemViewMapping" />
     </insert>
+    
+    <rollback>
+      DELETE * FROM vmap_ivm WHERE id='EsIvmSynonymMappingsTarget';
+      DELETE * FROM vmap_im2ivm_rel WHERE item_id='EsImSynonymMappingsTarget' and view_id='AmIvmDef';
+      DELETE * FROM vmap_attrval_rel WHERE attribute_id='AmAvDefBnd' and mapper_id='EsIvmSynonymMappingsTarget';
+      DELETE * FROM vmap_im WHERE id='EsImSynonymMappingsTarget';
+      DELETE * FROM vmap_fh WHERE id='EsFhSynonymMappingsTarget';
+      DELETE * FROM vmap_ivm WHERE id='EsIvmSearchAssetTarget';
+      DELETE * FROM vmap_im2ivm_rel WHERE item_id='EsImSearchAssetTarget' and view_id='AmIvmDef';
+      DELETE * FROM vmap_attrval_rel WHERE attribute_id='AmAvDefBnd' and mapper_id='EsIvmSearchAssetTarget';
+      DELETE * FROM vmap_im WHERE id='EsImSearchAssetTarget';
+      DELETE * FROM vmap_fh WHERE id='EsFhSearchAssetTarget';
+    </rollback>
+
   </changeSet>  
 
   <!-- End of  US6144 (Need add'l publishing safeguards for adding/modyfing Solr assets in the BCC search respository -->
