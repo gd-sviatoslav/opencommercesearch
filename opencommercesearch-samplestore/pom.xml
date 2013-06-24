@@ -56,6 +56,7 @@
 								<descriptor>src/main/assembly/module-with-deps.xml</descriptor>
 							</descriptors>
 							<appendAssemblyId>false</appendAssemblyId>
+							<classifier></classifier>
 							<finalName>ocs-catalog-indexer</finalName>
 						</configuration>
 					</execution>
@@ -69,8 +70,7 @@
 							<descriptors>
 								<descriptor>src/main/assembly/config_production.xml</descriptor>
 							</descriptors>
-							<appendAssemblyId>false</appendAssemblyId>
-							<finalName>ocs-catalog-indexer-config</finalName>
+							<appendAssemblyId>true</appendAssemblyId>
 						</configuration>
 					</execution>
 				</executions>

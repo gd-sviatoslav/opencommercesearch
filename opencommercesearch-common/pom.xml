@@ -138,8 +138,10 @@
 			<resource>
 				<directory>${basedir}/src/main/config</directory>
 				<excludes>
-					<exclude>**/atg/**</exclude>
-					<exclude>**/org/**</exclude>				
+					<exclude>**/atg/**/*.xml</exclude>
+					<exclude>**/atg/**/*.properties</exclude>
+					<exclude>**/org/**/*.xml</exclude>
+					<exclude>**/org/**/*.properties</exclude>		
 				</excludes>
 			</resource>
 		</resources>
@@ -170,17 +172,7 @@
 		</testResources>
 
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.5.1</version>
-
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-
+		
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -245,8 +237,15 @@
                         <include>**/*.aff</include>
                         <include>**/*.dic</include>
                     </includes>
+                    <excludes>
+						<exclude>${basedir}/src/main/config/**/atg/**/*.xml</exclude>
+						<exclude>${basedir}/src/main/config/**/atg/**/*.properties</exclude>
+						<exclude>${basedir}/src/main/config/**/org/**/*.xml</exclude>
+						<exclude>${basedir}/src/main/config/**/org/**/*.properties</exclude>		
+					</excludes>
                 </configuration>
 			</plugin>
+			
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -286,10 +285,9 @@
 							<descriptors>
 								<descriptor>src/main/assembly/config.xml</descriptor>
 							</descriptors>
-							<appendAssemblyId>false</appendAssemblyId>
-							<finalName>ocs-common-config</finalName>
+							<appendAssemblyId>true</appendAssemblyId>
 						</configuration>
-					</execution>
+					</execution>					
 				</executions>
 			</plugin>
 
