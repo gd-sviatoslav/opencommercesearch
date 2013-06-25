@@ -22,6 +22,11 @@
 
 	<dependencies>
 
+		<dependency>
+			<groupId>org.opencommercesearch</groupId>
+			<artifactId>opencommercesearch-solr</artifactId>
+		</dependency>
+		
 		<!-- Solr -->
 		<dependency>
 			<groupId>org.apache.solr</groupId>
@@ -30,7 +35,27 @@
 
 		<dependency>
 			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-core</artifactId>
+			<exclusions>
+	        	<exclusion>
+	          		<groupId>org.slf4j</groupId>
+	          		<artifactId>slf4j-api</artifactId>
+	        	</exclusion>
+	        	<exclusion>
+	          		<groupId>org.slf4j</groupId>
+	          		<artifactId>slf4j-jdk14</artifactId>
+	        	</exclusion>
+	        	<exclusion>
+	          		<groupId>org.slf4j</groupId>
+	          		<artifactId>jcl-over-slf4j</artifactId>
+	        	</exclusion>
+			</exclusions>			
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.solr</groupId>
 			<artifactId>solr-test-framework</artifactId>
+			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
@@ -57,18 +82,12 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.opencommercesearch</groupId>
-			<artifactId>opencommercesearch-solr</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.healthonnet.lucene</groupId>
 			<artifactId>hon-lucene-synonyms</artifactId>
 			<scope>system</scope>
 			<systemPath>${basedir}/lib/hon-lucene-synonyms-${lucene.synonyms}.jar</systemPath>
 		</dependency>
 
-		<!-- provided -->
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>

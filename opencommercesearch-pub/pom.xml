@@ -22,6 +22,11 @@
 
 	<dependencies>
 
+		<dependency>
+			<groupId>org.opencommercesearch</groupId>
+			<artifactId>opencommercesearch-common</artifactId>
+		</dependency>
+
 		<!-- ATG Dynamo Application Server -->
 		<dependency>
 			<groupId>atg</groupId>
@@ -51,11 +56,6 @@
 			<artifactId>hon-lucene-synonyms</artifactId>
 			<scope>system</scope>
 			<systemPath>${basedir}/../opencommercesearch-common/lib/hon-lucene-synonyms-${lucene.synonyms}.jar</systemPath>
-		</dependency>
-
-		<dependency>
-			<groupId>org.opencommercesearch</groupId>
-			<artifactId>opencommercesearch-common</artifactId>
 		</dependency>
 
 		<dependency>

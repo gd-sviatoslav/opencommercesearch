@@ -18,6 +18,7 @@
 */
 package org.opencommercesearch.sample.store;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -29,7 +30,6 @@ import atg.commerce.inventory.InventoryException;
 import atg.repository.RepositoryException;
 import atg.repository.RepositoryItem;
 import atg.repository.RepositoryItemDescriptor;
-import com.google.common.collect.Lists;
 
 /**
  * @author S.L. (slisenkin at griddynamics dot com) 11.06.2013 17:01:36
@@ -74,7 +74,7 @@ public class SampleStoreIndexer extends SearchFeed {
     protected void processProduct(RepositoryItem product, Map<Locale, List<SolrInputDocument>> documents) throws RepositoryException, InventoryException {
         List<SolrInputDocument> docs = documents.get(DEFAULT_LOCALE);
         if(null == docs){
-            docs = Lists.newArrayList();
+            docs = new ArrayList<SolrInputDocument>();
             documents.put(DEFAULT_LOCALE, docs);
         }
         SolrInputDocument doc = new SolrInputDocument();

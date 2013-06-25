@@ -6,7 +6,6 @@
     <description>Adds custom properties used by the search engine</description>
  </header>
 
-<item-descriptor name="ruleBasedCategory" cache-mode="simple"/>
-<item-descriptor name="ruleExpression" cache-mode="simple"/>
-
+<!-- Erased table references -->
+	
 </gsa-template>

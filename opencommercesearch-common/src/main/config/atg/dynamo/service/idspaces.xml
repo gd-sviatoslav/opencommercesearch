@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <id-spaces>
-  <id-space name="synonym" prefix="syn" seed="1" batch-size="100"/>
-  <id-space name="synonymList" prefix="synList" seed="1" batch-size="10"/>
-  <id-space name="rule" prefix="rule" seed="1" batch-size="10"/>
-  <id-space name="facet" prefix="facet" seed="1" batch-size="10"/>
+  <!-- Erased references -->
 </id-spaces>
