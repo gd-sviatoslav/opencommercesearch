@@ -186,7 +186,7 @@
     </arr>
   </requestHandler>
 
-  <queryParser name="synonym_edismax" class="solr.SynonymExpandingExtendedDismaxQParserPlugin">
+  <queryParser name="synonym_edismax" class="org.apache.solr.search.SynonymExpandingExtendedDismaxQParserPlugin">
     <str name="luceneMatchVersion">LUCENE_42</str>
     <lst name="synonymAnalyzers">
       <lst name="default">
