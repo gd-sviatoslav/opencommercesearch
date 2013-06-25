@@ -43,6 +43,13 @@
        </column>
     </createTable>
     <addPrimaryKey tableName="cs_syn_list_mapping" columnNames="syn_list_id,syn_id" constraintName="cs_syn_list_map_pk"/>
+
+    <rollback>
+      <dropTable tableName="cs_syn_list_mapping"/>
+      <dropTable tableName="cs_synonym"/>
+      <dropTable tableName="cs_synonym_list"/>
+    </rollback>
+
   </changeSet>
 
   <changeSet author="commercesearch" id="2">
@@ -105,6 +112,14 @@
               foreignKeyName="cs_rule_cat_cat_fk" references="dcs_category(category_id)"/>
       </column>
     </createTable>
+
+    <rollback>    
+      <dropTable tableName="cs_rule_cats"/>
+      <dropTable tableName="cs_rule_catalogs"/>
+      <dropTable tableName="cs_rule_sites"/>
+      <dropTable tableName="cs_rule"/>
+    </rollback>
+
   </changeSet>
 
   <changeSet author="commercesearch" id="4">
@@ -151,6 +166,14 @@
               foreignKeyName="cs_block_rule_prod_prod_fk" references="dcs_product(product_id)"/>
       </column>
     </createTable>
+
+    <rollback>
+      <dropTable tableName="cs_block_rule_prods"/>
+      <dropTable tableName="cs_block_rule"/>
+      <dropTable tableName="cs_boost_rule_prods"/>
+      <dropTable tableName="cs_boost_rule"/>
+    </rollback>
+
   </changeSet>
 
   <changeSet author="commercesearch" id="5">
@@ -205,6 +228,12 @@
         <constraints nullable="true" />
       </column>
     </createTable>
+
+    <rollback>
+      <dropTable tableName="cs_field_facet"/>
+      <dropTable tableName="cs_facet"/>
+    </rollback>
+
   </changeSet>
 
   <changeSet author="commercesearch" id="6">
@@ -230,6 +259,12 @@
                foreignKeyName="cs_facet_rule_facet_facet_fk" references="cs_facet(facet_id)"/>
       </column>
     </createTable>
+
+    <rollback>
+      <dropTable tableName="cs_facet_rule_facets"/>
+      <dropTable tableName="cs_facet_rule"/>
+    </rollback>
+
   </changeSet>
 
   <changeSet author="commercesearch" id="7">
@@ -279,6 +314,12 @@
         <constraints nullable="true" />
       </column>
     </createTable>
+
+    <rollback>
+      <dropTable tableName="cs_date_facet"/>
+      <dropTable tableName="cs_range_facet"/>
+    </rollback>
+
   </changeSet>
 
   <changeSet author="commercesearch" id="8">
@@ -308,6 +349,12 @@
         <constraints nullable="false" />
       </column>
     </createTable>
+    
+    <rollback>
+      <dropTable tableName="cs_query_facet_queries"/>
+      <dropTable tableName="cs_query_facet"/>
+    </rollback>
+
   </changeSet>
 
   <changeSet author="commercesearch" id="9">
@@ -323,6 +370,9 @@
         <constraints nullable="false"/>
       </column>
     </createTable>
+    <rollback>
+      <dropTable tableName="cs_redirect_rule"/>
+    </rollback>
   </changeSet>
   
   <changeSet author="commercesearch" id="11">
@@ -330,6 +380,7 @@
         <foreignKeyConstraintExists foreignKeyName="cs_rule_site_site_fk" />
     </preConditions>
     <dropForeignKeyConstraint constraintName="cs_rule_site_site_fk" baseTableName="cs_rule_sites"/>
+    <rollback/>
   </changeSet> 
   
   <changeSet author="commercesearch" id="12">
@@ -337,6 +388,7 @@
         <foreignKeyConstraintExists foreignKeyName="cs_rule_sites" /> 
     </preConditions>
     <dropForeignKeyConstraint constraintName="cs_rule_catalog_cat_fk" baseTableName="cs_rule_catalogs"/>
+    <rollback/>
   </changeSet>  
   
   <changeSet author="commercesearch" id="13">
@@ -344,6 +396,7 @@
         <foreignKeyConstraintExists foreignKeyName="cs_rule_cat_cat_fk" /> 
     </preConditions>
     <dropForeignKeyConstraint constraintName="cs_rule_cat_cat_fk" baseTableName="cs_rule_cats"/>
+    <rollback/>
   </changeSet>  
   
   <changeSet author="commercesearch" id="14">
@@ -351,6 +404,7 @@
         <foreignKeyConstraintExists foreignKeyName="cs_boot_rule_prod_prod_fk"  /> 
     </preConditions>
     <dropForeignKeyConstraint constraintName="cs_boot_rule_prod_prod_fk" baseTableName="cs_boost_rule_prods"/>
+    <rollback/>
   </changeSet>       
      
   <changeSet author="commercesearch" id="15">
@@ -358,6 +412,7 @@
         <foreignKeyConstraintExists foreignKeyName="cs_block_rule_prod_prod_fk" /> 
     </preConditions>
     <dropForeignKeyConstraint constraintName="cs_block_rule_prod_prod_fk" baseTableName="cs_block_rule_prods"/>
+    <rollback/>
   </changeSet>  
 
 
@@ -383,12 +438,17 @@
                          foreignKeyName="cs_cat_rul_exp_cat_fk" references="dcs_category(category_id)"/>
             </column>
             <column name="rule_expression_id" type="VARCHAR2(40 BYTE)">
-                <constraints nullable="false"
-                         foreignKeyName="cs_cat_rul_exp_exp_fk" references="cs_rule_expression(id)"/>
+                <constraints nullable="false" foreignKeyName="cs_cat_rul_exp_exp_fk" references="cs_rule_expression(id)"/>
             </column>
             <column name="position" type="number(19)"/>
         </createTable>
         <addPrimaryKey tableName="cs_category_rule_expression" columnNames="category_id,rule_expression_id,position" constraintName="cs_cat_rul_exp_pk"/>
+      
+      <rollback>
+        <dropTable tableName="cs_category_rule_expression"/>
+        <dropTable tableName="cs_rule_expression"/>
+      </rollback>
+
   </changeSet>
   
   <changeSet author="commercesearch" id="17">
@@ -423,6 +483,11 @@
       <column name="position" type="number(19)"/>
     </createTable>
     <addPrimaryKey tableName="cs_ranking_rule_expression" columnNames="rule_id,rule_expression_id,position" constraintName="cs_ranking_rule_expr_pk"/>
+
+    <rollback>
+      <dropTable tableName="cs_ranking_rule_expression"/>
+      <dropTable tableName="cs_ranking_rule"/>
+    </rollback>    
   </changeSet>
   
  <changeSet author="commercesearch" id="19">
@@ -435,6 +500,7 @@
             <constraints nullable="true"/>
         </column>
     </addColumn>
+    <rollback/>
   </changeSet>
 
   <changeSet author="commercesearch" id="20">
@@ -442,6 +508,7 @@
             <not><sqlCheck expectedResult="0">select count(*) from cs_rule where target is null</sqlCheck></not>
         </preConditions>
         <sql>update cs_rule set target='1' where target is null;</sql>
+    <rollback/>
   </changeSet>
 
   <changeSet author="commercesearch" id="21">
@@ -464,6 +531,7 @@
       </sqlCheck></not>
     </preConditions>
     <dropNotNullConstraint tableName="cs_rule" columnName="query"/>    
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="22">
@@ -476,6 +544,7 @@
             <constraints nullable="true"/>
         </column>
     </addColumn>
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="23">
@@ -483,6 +552,7 @@
             <not><sqlCheck expectedResult="0">select count(*) from cs_rule where target = '1' and type = '5'</sqlCheck></not>
         </preConditions>
         <sql>update cs_rule set target='2' where target = '1' and type = '5';</sql>
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="24">
@@ -495,6 +565,7 @@
             <constraints nullable="true"/>
         </column>
     </addColumn>
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="25">
@@ -509,6 +580,7 @@
             <constraints nullable="true"/>
         </column>
     </addColumn>
+    <rollback/>
   </changeSet>
 
   <changeSet author="commercesearch" id="26">
@@ -531,6 +603,7 @@
       </sqlCheck>
     </preConditions>
     <addNotNullConstraint tableName="cs_rule" columnName="target"/>    
+    <rollback/>
   </changeSet> 
   
   <changeSet author="commercesearch" id="27">
@@ -554,6 +627,7 @@
     </preConditions>
     <sql>UPDATE cs_ranking_rule SET notes='Update me' WHERE notes IS NULL</sql>
     <addNotNullConstraint tableName="cs_ranking_rule" columnName="notes"/>    
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="28">
@@ -571,6 +645,7 @@
             <constraints nullable="true"/>
         </column>
     </addColumn>  
+    <rollback/>
   </changeSet> 
   
   <changeSet author="commercesearch" id="29">
@@ -580,6 +655,7 @@
     <addColumn tableName="cs_facet_rule_facets">
         <column name="position" type="number(19)" defaultValueNumeric="0" />
     </addColumn>  
+    <rollback/>
   </changeSet>   
   
   <changeSet author="commercesearch" id="30">
@@ -588,6 +664,7 @@
     </preConditions>     
     <dropPrimaryKey tableName="cs_facet_rule_facets" constraintName="cs_facet_rule_facet_pk"/>
     <addPrimaryKey tableName="cs_facet_rule_facets" columnNames="rule_id,facet_id,position" constraintName="cs_facet_rule_facet_pk"/>
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="31">
@@ -595,6 +672,7 @@
         <tableExists tableName="cs_facet_rule_facets"/>
     </preConditions>
     <sql>DELETE cs_facet_rule_facets WHERE position = 0</sql>
+    <rollback/>
   </changeSet> 
   
   <changeSet author="commercesearch" id="32">
@@ -610,6 +688,7 @@
     <sql>UPDATE cs_facet SET system_name = name</sql>
 
     <addNotNullConstraint tableName="cs_facet" columnName="system_name" />
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="33">
@@ -625,6 +704,7 @@
     <sql>UPDATE cs_rule SET include_subcats = 1</sql>
 
     <addNotNullConstraint tableName="cs_rule" columnName="include_subcats" />
+    <rollback/>
   </changeSet>  
   
   <changeSet author="commercesearch" id="34">
@@ -634,6 +714,7 @@
     </preConditions>
     
     <modifyDataType tableName="cs_redirect_rule" columnName="url" newDataType="VARCHAR2(1024)"/>
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="35">
@@ -643,9 +724,8 @@
     </preConditions>
 
     <modifyDataType tableName="cs_rule" columnName="name" newDataType="VARCHAR2(256)"/>
+    <rollback/>
   </changeSet>          
-  
-
 
 <changeSet author="commercesearch" id="36">
     <preConditions onFail="MARK_RAN">
@@ -663,6 +743,10 @@
         <constraints nullable="false" />
       </column>
     </createTable>
+
+    <rollback>
+      <dropTable tableName="cs_acls"/>
+    </rollback>    
 </changeSet>
 
   <changeSet author="commercesearch" id="37">
@@ -692,6 +776,8 @@
     <addColumn tableName="cs_synonym_list">
         <column name="item_owner" type="VARCHAR2(128)"/>
     </addColumn>
+  
+    <rollback/>
   </changeSet>
   
   <changeSet author="commercesearch" id="38">
@@ -708,6 +794,9 @@
       </column>
       <column name="blacklist_term" type="VARCHAR2(254 BYTE)"/>
     </createTable>
+    <rollback>
+      <dropTable tableName="cs_facet_blacklist"/>
+    </rollback>
   </changeSet>
 
   <changeSet author="commercesearch" id="39">
@@ -717,6 +806,7 @@
     </preConditions>
 
     <dropColumn tableName="cs_facet_blacklist" columnName="seq_num"/>
+    <rollback/>
   </changeSet>
 
   <changeSet author="commercesearch" id="40">
@@ -737,6 +827,7 @@
     <addForeignKeyConstraint baseColumnNames="syn_list_id" baseTableName="cs_synonym" constraintName="CS_SYN_FK" deferrable="false" initiallyDeferred="false"
                              referencedColumnNames="syn_list_id" referencedTableName="cs_synonym_list"/>
     <dropTable cascadeConstraints="true" tableName="cs_syn_list_mapping"/>
+    <rollback/>
   </changeSet>          
                                                                                                    
   <changeSet author="commercesearch" id="41">
@@ -755,6 +846,7 @@
    <sql>update cs_synonym_list set fileName = 'facet_synonyms' where name ='Facet Synonyms'</sql>
                                                                                                                                                                   
    <addNotNullConstraint tableName="cs_synonym_list" columnName="fileName" />
+    <rollback/>
   </changeSet>
 
   <!-- Start of  US6144 (Need add'l publishing safeguards for adding/modyfing Solr assets in the BCC search respository -->
@@ -833,6 +925,8 @@
     <addNotNullConstraint tableName="cs_rule" columnName="rationale" />
     <addNotNullConstraint tableName="cs_synonym_list" columnName="rationale" />
     <addNotNullConstraint tableName="cs_synonym" columnName="rationale" />
+
+      <rollback/>
     </changeSet>
   <!-- End of  US6144 (Need add'l publishing safeguards for adding/modyfing Solr assets in the BCC search respository -->
 

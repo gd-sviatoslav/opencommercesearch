@@ -382,7 +382,7 @@
     </createTable>
     <addPrimaryKey tableName="cs_block_rule_prods" columnNames="rule_id,product_id,asset_version" constraintName="cs_block_rule_prod_pk"/>    
 
-    <rollback>    
+    <rollback>
       <dropTable tableName="cs_block_rule_prods"/>
       <dropTable tableName="cs_block_rule"/>
       <dropTable tableName="cs_boost_rule_prods"/>
@@ -472,6 +472,7 @@
       <dropTable tableName="cs_field_facet"/>
       <dropTable tableName="cs_facet"/>
     </rollback>
+    
   </changeSet>
 
   <changeSet author="commercesearch" id="6">
