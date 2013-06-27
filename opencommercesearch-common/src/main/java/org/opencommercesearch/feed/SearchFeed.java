@@ -33,6 +33,7 @@ import org.apache.solr.common.SolrInputDocument;
 import org.opencommercesearch.SearchServer;
 import org.opencommercesearch.SearchServerException;
 import org.opencommercesearch.repository.RuleBasedCategoryProperty;
+import org.opencommercesearch.util.ATGLoggingUtil;
 import atg.commerce.inventory.InventoryException;
 import atg.nucleus.GenericService;
 import atg.repository.Repository;
@@ -134,9 +135,7 @@ public abstract class SearchFeed extends GenericService {
         RepositoryView productView = getProductRepository().getView(getProductItemDescriptorName());
         int productCount = productRql.executeCountQuery(productView, null);
 
-        if (isLoggingInfo()) {
-            logInfo("Started full feed for " + productCount + " products");
-        }
+        ATGLoggingUtil.info(this, "Started full feed for [{0}] products", productCount);
 
         long indexStamp = System.currentTimeMillis();
         int processedProductCount = 0;
@@ -161,10 +160,7 @@ public abstract class SearchFeed extends GenericService {
             rqlArgs[0] += getProductBatchSize();
             products = productRql.executeQueryUncached(productView, rqlArgs);
 
-            if (isLoggingInfo()) {
-                logInfo("Processed " + processedProductCount  + " out of " + productCount);
-                logInfo("Indexable products "+ indexedProductCount);
-            }
+            ATGLoggingUtil.info(this, "Processed [{0}], indexable [{1}] out of [{2}]", processedProductCount, indexedProductCount, productCount);            
         }
 
         sendDocuments(documents, indexStamp, 0);

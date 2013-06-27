@@ -25,7 +25,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.opencommercesearch.deployment.EvaluationServiceSender;
 import org.opencommercesearch.feed.SearchFeed;
-import org.opencommercesearch.sample.store.ATGLoggingUtil;
+import org.opencommercesearch.util.ATGLoggingUtil;
 import atg.deployment.common.Status;
 import atg.deployment.common.event.DeploymentEvent;
 import atg.deployment.common.event.DeploymentEventListener;
@@ -134,7 +134,7 @@ public class CatalogIndexingDeploymentListener extends GenericService implements
 	private boolean isProductRepositoryUpdated(DeploymentEvent event){	    
 	    @SuppressWarnings("unchecked")
         Map<String, Set<String>> affectedItemTypes = event.getAffectedItemTypes();
-        ATGLoggingUtil.debug(this, "Deployment event received: {0} -> {1}", getTriggerStatus(), affectedItemTypes);
+        ATGLoggingUtil.info(this, "Deployment event [{0}], affected item types: [{1}]", getTriggerStatus(), affectedItemTypes);
         
         if (affectedItemTypes != null) {
             for (Entry<String, Set<String>> entry : affectedItemTypes.entrySet()) {

@@ -141,8 +141,11 @@
        <openSearcher>false</openSearcher>
      </autoCommit>
 
+    <updateLog class="solr.FSUpdateLog">
+      <str name="dir">${solr.ulog.dir:}</str>
+    </updateLog>
+    
   </updateHandler>
-
 
   <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        Query section - these settings control query time things like caches

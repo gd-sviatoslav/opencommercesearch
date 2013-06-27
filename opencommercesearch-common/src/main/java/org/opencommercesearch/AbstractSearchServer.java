@@ -50,6 +50,7 @@ import org.opencommercesearch.Facet.Filter;
 import org.opencommercesearch.SearchServerException.ExportSynonymException;
 import org.opencommercesearch.repository.RedirectRuleProperty;
 import org.opencommercesearch.repository.SearchRepositoryItemDescriptor;
+import org.opencommercesearch.util.ATGLoggingUtil;
 import atg.multisite.Site;
 import atg.multisite.SiteContextManager;
 import atg.nucleus.GenericService;
@@ -573,9 +574,12 @@ public abstract class AbstractSearchServer<T extends SolrServer> extends Generic
     }
 
     public UpdateResponse add(Collection<SolrInputDocument> docs, String collection, Locale locale) throws SearchServerException {
+        String collectionName = getCollectionName(collection, locale);
+        ATGLoggingUtil.debug(this, "Send update to collection: [{0}]", collectionName);
+        
         UpdateRequest req = new UpdateRequest();
         req.add(docs);
-        req.setParam("collection", getCollectionName(collection, locale));
+        req.setParam("collection", collectionName);
 
         try {
             return req.process(getSolrServer(collection, locale));

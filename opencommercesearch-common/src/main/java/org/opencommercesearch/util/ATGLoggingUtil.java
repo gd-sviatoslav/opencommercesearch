@@ -16,7 +16,7 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package org.opencommercesearch.sample.store;
+package org.opencommercesearch.util;
 
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;

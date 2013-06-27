@@ -4,4 +4,7 @@
   Production environments should overwrite this file with custom settings
 -->
 <updateHandler class="solr.DirectUpdateHandler2">
+    <updateLog class="solr.FSUpdateLog">
+      <str name="dir">${solr.ulog.dir:}</str>
+    </updateLog>
 </updateHandler>

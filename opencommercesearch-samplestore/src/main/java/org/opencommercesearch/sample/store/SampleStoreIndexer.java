@@ -26,6 +26,7 @@ import java.util.Set;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.opencommercesearch.feed.SearchFeed;
+import org.opencommercesearch.util.ATGLoggingUtil;
 import atg.commerce.inventory.InventoryException;
 import atg.repository.RepositoryException;
 import atg.repository.RepositoryItem;
@@ -77,18 +78,22 @@ public class SampleStoreIndexer extends SearchFeed {
             docs = new ArrayList<SolrInputDocument>();
             documents.put(DEFAULT_LOCALE, docs);
         }
+        ATGLoggingUtil.debug(this, "Doc creation..");
         SolrInputDocument doc = new SolrInputDocument();
 
         // todo now sl: load fields by schema configuration
         RepositoryItemDescriptor meta = product.getItemDescriptor();
         String[] propNames = meta.getPropertyNames();
         for (String name : propNames) {
-            doc.setField(name, product.getPropertyValue(name));
+            Object val = product.getPropertyValue(name);
+            ATGLoggingUtil.debug(this, "Add field[{0}] value: [{1}]", name, val);    
+            doc.setField(name, val);
         }
  
         loadCategoryPaths(doc, product);
         
         docs.add(doc);
+        ATGLoggingUtil.debug(this, "Doc added.");
     }
 
 }

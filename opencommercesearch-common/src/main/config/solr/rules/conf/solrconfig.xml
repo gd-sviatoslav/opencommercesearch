@@ -52,7 +52,7 @@
 
   <xi:include href="xinclude/update-handler.xml" parse="xml"
     xmlns:xi="http://www.w3.org/2001/XInclude" />
-
+  
   <query>
     <maxBooleanClauses>1024</maxBooleanClauses>
 
