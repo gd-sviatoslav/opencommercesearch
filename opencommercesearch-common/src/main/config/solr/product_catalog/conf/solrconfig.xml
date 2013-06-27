@@ -44,7 +44,7 @@
 
 
   <indexConfig>
-    <lockType>${solr.lockFactory:native}</lockType>
+    <lockType>${solr.lockFactory:none}</lockType>
     <unlockOnStartup>true</unlockOnStartup>
   </indexConfig>
 

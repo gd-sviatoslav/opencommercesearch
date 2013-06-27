@@ -181,9 +181,9 @@ public abstract class SearchFeed extends GenericService {
                 for (SolrInputDocument doc : documentList) {
                     doc.setField("indexStamp", indexStamp);
                 }
-
                 try {
                     UpdateResponse response = getSearchServer().add(documentList, entry.getKey());
+                    getSearchServer().commit(); // hard commit
                     onDocumentsSent(response, documentList);
                     documentList.clear();
                 } catch (SearchServerException ex) {
