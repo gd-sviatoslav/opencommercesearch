@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<!DOCTYPE gsa-template PUBLIC "-//Art Technology Group, Inc.//
+DTD Dynamo Security//EN" "http://www.atg.com/dtds/gsa/gsa_1.0.dtd">
+
+<gsa-template>
+    <header>
+        <name>Search Repository</name>
+        <author>gsegura</author>
+        <version>1.0</version>
+    </header>
+
+    <item-descriptor name="synonymList">
+        <table name="cs_synonym_list" type="primary" id-column-name="syn_list_id">
+            <property name="item_owner" column-name="item_owner" data-type="string"/>
+        </table>
+
+        <table name="cs_acls" type="multi" id-column-names="item_acl_id"
+               multi-column-name="acl_index">
+            <property name="item_acl" column-names="item_acl" data-type="array" component-data-type="string">
+                <attribute name="maxFragmentSize" value="254"/>
+            </property>
+        </table>
+
+    </item-descriptor>
+
+    <item-descriptor name="synonym">
+        <table name="cs_synonym" type="primary" id-column-name="syn_id">
+            <property name="item_owner" column-name="item_owner" data-type="string"/>
+        </table>
+
+        <table name="cs_acls" type="multi" id-column-names="item_acl_id"
+               multi-column-name="acl_index">
+            <property name="item_acl" column-names="item_acl" data-type="array" component-data-type="string">
+                <attribute name="maxFragmentSize" value="254"/>
+            </property>
+        </table>
+    </item-descriptor>
+
+    <item-descriptor name="facet">
+        <table name="cs_facet" type="primary" id-column-name="facet_id">
+            <property name="item_owner" column-name="item_owner" data-type="string"/>
+        </table>
+        <table name="cs_acls" type="multi" id-column-names="item_acl_id"
+               multi-column-name="acl_index">
+            <property name="item_acl" column-names="item_acl" data-type="array" component-data-type="string">
+                <attribute name="maxFragmentSize" value="254"/>
+            </property>
+        </table>
+    </item-descriptor>
+
+    <item-descriptor name="rule">
+        <table name="cs_rule" type="primary" id-column-name="rule_id">
+            <property name="item_owner" column-name="item_owner" data-type="string"/>
+        </table>
+        <table name="cs_acls" type="multi" id-column-names="item_acl_id"
+               multi-column-name="acl_index">
+            <property name="item_acl" column-names="item_acl" data-type="array" component-data-type="string">
+                <attribute name="maxFragmentSize" value="254"/>
+            </property>
+        </table>
+    </item-descriptor>
+
+</gsa-template>
+
+

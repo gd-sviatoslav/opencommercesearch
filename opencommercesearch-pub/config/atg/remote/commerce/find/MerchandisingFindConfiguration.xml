@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!DOCTYPE find-configuration
-  PUBLIC "-//Art Technology Group, Inc.//DTD Asset Manager Find Configuration//EN"
-  'http://www.atg.com/dtds/find-configuration/find-configuration_1.0.dtd'>
-
 <find-configuration site-filtering="true" xml-combine="append">
 
 	<asset-family id="Search" site-filtering="false">
